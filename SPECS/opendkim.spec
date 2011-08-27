@@ -5,7 +5,7 @@
 Summary: DomainKeys Identified Mail (DKIM) Signature milter and library
 Name: opendkim
 Version: 2.4.2
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: BSD and Sendmail
 URL: http://opendkim.org/
 Group: System Environment/Daemons
@@ -108,7 +108,7 @@ Socket	inet:8891@localhost
 Umask	002
 
 # This specifies a file in which to store DKIM transaction statistics.
-#Statistics	%{_localstatedir}/%{name}/stats
+#Statistics	%{_localstatedir}/spool/%{name}/stats.txt
 
 ## SIGNING OPTIONS
 
@@ -197,6 +197,7 @@ rm -rf %{buildroot}
 %doc contrib/convert/convert_keylist.sh %{name}/*.sample
 %doc %{name}/%{name}.conf.simple-verify %{name}/%{name}.conf.simple
 %doc %{name}/README contrib/lua/*.lua
+%doc contrib/stats/README.opendkim-reportstats
 %config(noreplace) %{_sysconfdir}/%{name}.conf
 %config(noreplace) %{_sysconfdir}/tmpfiles.d/%{name}.conf
 %{_initrddir}/%{name}
@@ -222,6 +223,9 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
+* Sat Aug 27 2011 Steve Jenkins <steve stevejenkins com> 2.4.2-4
+- 
+
 * Mon Aug 22 2011 Steve Jenkins <steve stevejenkins com> 2.4.2-3
 - Mad props to Matt Domsch for sponsoring and providing feedback
 - Removed {?OSshort} variable in Release: header
