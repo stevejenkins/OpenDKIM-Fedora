@@ -2,7 +2,7 @@
 #
 # $Id: opendkim.spec.in,v 1.2 2010/10/25 17:13:47 cm-msk Exp $
 
-Summary: DomainKeys Identified Mail (DKIM) Signature milter and library
+Summary: A DomainKeys Identified Mail (DKIM) milter to sign and/or verify mail
 Name: opendkim
 Version: 2.4.2
 Release: 4%{?dist}
@@ -14,22 +14,17 @@ Requires (pre): shadow-utils
 Requires (post): chkconfig
 Requires (preun): chkconfig, initscripts
 Requires (postun): initscripts
-BuildRequires: sendmail-devel, openssl-devel, libtool, pkgconfig
+BuildRequires: sendmail-devel, openssl-devel, pkgconfig
 Source0: http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
 Patch0: %{name}-%{version}-initscript.patch
 Patch1: %{name}-%{version}-installreadme.patch
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 %description
-OpenDKIM provides an open source library that implements the DKIM service,
-plus a milter-based filter application that can plug in to any milter-aware
-MTA, including sendmail, Postfix, or any other MTA that supports the milter
-protocol.
-
-The DKIM sender authentication system was originally created by the E-mail
-Signing Technology Group (ESTG) and is now a proposed standard of the
-IETF (RFC4871).  DKIM is an amalgamation of the DomainKeys (DK) proposal by
-Yahoo!, Inc. and the Internet Identified Mail (IIM) proposal by Cisco.
+OpenDKIM allows signing and/or verification of email through an open source
+library that implements the DKIM service, plus a milter-based filter
+application that can plug in to any milter-aware MTA, including sendmail,
+Postfix, or any other MTA that supports the milter protocol.
 
 %package -n libopendkim
 Summary: An open source DKIM library
@@ -55,14 +50,13 @@ required for developing applications against libopendkim.
 
 %build
 %configure --enable-stats
+sed -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
+sed -i 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' libtool
 
 %install
 rm -rf %{buildroot}
 
-# Always use system libtool instead of opendkim provided one
-%global LIBTOOL LIBTOOL=`which libtool`
-
-make DESTDIR=%{buildroot} install %{?_smp_mflags} %{LIBTOOL}
+make DESTDIR=%{buildroot} install %{?_smp_mflags}
 mkdir -p %{buildroot}%{_sysconfdir}
 mkdir -p %{buildroot}%{_initrddir}
 install -m 0755 contrib/init/redhat/opendkim %{buildroot}%{_initrddir}/%{name}
@@ -107,8 +101,8 @@ Socket	inet:8891@localhost
 # privileged user (e.g. Postfix)
 Umask	002
 
-# This specifies a file in which to store DKIM transaction statistics.
-#Statistics	%{_localstatedir}/spool/%{name}/stats.txt
+# This specifies a text file in which to store DKIM transaction statistics.
+#Statistics	%{_localstatedir}/spool/%{name}/stats.dat
 
 ## SIGNING OPTIONS
 
@@ -157,6 +151,11 @@ mkdir -p %{buildroot}%{_localstatedir}/spool/%{name}
 mkdir -p %{buildroot}%{_localstatedir}/run/%{name}
 mkdir -p %{buildroot}%{_sysconfdir}/%{name}
 mkdir %{buildroot}%{_sysconfdir}/%{name}/keys
+
+install -m 0755 contrib/stats/%{name}-reportstats %{buildroot}%{_prefix}/bin/%{name}-reportstats
+sed -i 's|^OPENDKIMSTATSDIR="/var/db/opendkim"|OPENDKIMSTATSDIR="%{_localstatedir}/spool/%{name}"|g' %{buildroot}%{_prefix}/bin/%{name}-reportstats
+sed -i 's|^OPENDKIMDATOWNER="mailnull:mailnull"|OPENDKIMDATOWNER="%{name}:%{name}"|g' %{buildroot}%{_prefix}/bin/%{name}-reportstats
+
 
 chmod 0644 contrib/convert/convert_keylist.sh
 
@@ -223,8 +222,11 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
-* Sat Aug 27 2011 Steve Jenkins <steve stevejenkins com> 2.4.2-4
-- 
+* Sun Sep 18 2011 Steve Jenkins <steve stevejenkins com> 2.4.2-4
+- Use Fedora standard method to fix pkg supplied libtool (Todd Lyons)
+- Updated Summary and Description
+- Fixed default stats file location in sample config file
+- Install opendkim-reportstats and README.opendkim-reportstats
 
 * Mon Aug 22 2011 Steve Jenkins <steve stevejenkins com> 2.4.2-3
 - Mad props to Matt Domsch for sponsoring and providing feedback

@@ -1,4 +1,6 @@
-This git repo contains spec files and patches for the OpenDKIM package I maintain in Fedora.
+This git repo contains spec files and patches for the OpenDKIM package I maintain in Fedora & EPEL.
+
+CONTRIBUTORS: Please do pull requests in the "develop" branch only. The "master" branch is just for release versions. Thanks!
 
 For official source code and documentation, please visit:
 
