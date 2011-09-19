@@ -138,12 +138,34 @@ KeyFile	%{_sysconfdir}/%{name}/keys/default.private
 #InternalHosts	refile:%{_sysconfdir}/%{name}/TrustedHosts
 EOF
 
+mkdir -p %{buildroot}%{_sysconfdir}/sysconfig
 cat > %{buildroot}%{_sysconfdir}/sysconfig/%{name} << 'EOF'
 # Uncomment the following line to disable automatic DKIM key creation
-# AUTOCREATE_DKIM_KEYS=NO
+#AUTOCREATE_DKIM_KEYS=NO
 #
 # Uncomment the following line to set the default DKIM selector
-# DKIM_SELECTOR=default
+#DKIM_SELECTOR=default
+#
+# Uncomment the following to set the default DKIM key directory
+#DKIM_KEYDIR=/etc/opendkim/keys
+EOF
+
+mkdir -p %{buildroot}%{_sysconfdir}/%{name}
+cat > %{buildroot}%{_sysconfdir}/%{name}/SigningTable << 'EOF'
+# The following wildcard will work only if
+# refile:%{_sysconfdir}/%{name}/SigningTable is included
+# in %{_sysconfdir}/%{name}.conf.
+
+#*@example.com default._domainkey.example.com
+
+# If refile: is not specified in %{_sysconfdir}/%{name}.conf, then full
+# user@host is checked first, then simply host, then user@.domain (with all
+# superdomains checked in sequence, so "foo.example.com" would first check
+# "user@foo.example.com", then "user@.example.com", then "user@.com"), then
+# .domain, then user@*, and finally *. See the opendkim.conf(5) man page
+# under "SigningTable".
+
+#example.com default._domainkey.example.com
 EOF
 
 install -p -d %{buildroot}%{_sysconfdir}/tmpfiles.d
@@ -206,6 +228,8 @@ rm -rf %{buildroot}
 %doc contrib/stats/README.opendkim-reportstats
 %config(noreplace) %{_sysconfdir}/%{name}.conf
 %config(noreplace) %{_sysconfdir}/tmpfiles.d/%{name}.conf
+%config(noreplace) %attr(-,%{name},%{name}) %{_sysconfdir}/%{name}/SigningTable
+%{_sysconfdir}/sysconfig/%{name}
 %{_initrddir}/%{name}
 %{_sbindir}/*
 %{_bindir}/*
@@ -235,6 +259,8 @@ rm -rf %{buildroot}
 - Fixed default stats file location in sample config file
 - Install opendkim-reportstats and README.opendkim-reportstats
 - Changed default stop priority in init script
+- Added example SigningTable
+- Added sysconfig support for AUTOCREATE_DKIM_KEYS, DKIM_SELECTOR, DKIM_KEYDIR
 
 * Mon Aug 22 2011 Steve Jenkins <steve stevejenkins com> 2.4.2-3
 - Mad props to Matt Domsch for sponsoring and providing feedback
