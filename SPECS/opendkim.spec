@@ -138,6 +138,14 @@ KeyFile	%{_sysconfdir}/%{name}/keys/default.private
 #InternalHosts	refile:%{_sysconfdir}/%{name}/TrustedHosts
 EOF
 
+cat > %{buildroot}%{_sysconfdir}/sysconfig/%{name} << 'EOF'
+# Uncomment the following line to disable automatic DKIM key creation
+# AUTOCREATE_DKIM_KEYS=NO
+#
+# Uncomment the following line to set the default DKIM selector
+# DKIM_SELECTOR=default
+EOF
+
 install -p -d %{buildroot}%{_sysconfdir}/tmpfiles.d
 cat > %{buildroot}%{_sysconfdir}/tmpfiles.d/%{name}.conf <<'EOF'
 D %{_localstatedir}/run/%{name} 0700 %{name} %{name} -
@@ -155,7 +163,6 @@ mkdir %{buildroot}%{_sysconfdir}/%{name}/keys
 install -m 0755 contrib/stats/%{name}-reportstats %{buildroot}%{_prefix}/bin/%{name}-reportstats
 sed -i 's|^OPENDKIMSTATSDIR="/var/db/opendkim"|OPENDKIMSTATSDIR="%{_localstatedir}/spool/%{name}"|g' %{buildroot}%{_prefix}/bin/%{name}-reportstats
 sed -i 's|^OPENDKIMDATOWNER="mailnull:mailnull"|OPENDKIMDATOWNER="%{name}:%{name}"|g' %{buildroot}%{_prefix}/bin/%{name}-reportstats
-
 
 chmod 0644 contrib/convert/convert_keylist.sh
 
@@ -222,11 +229,12 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
-* Sun Sep 18 2011 Steve Jenkins <steve stevejenkins com> 2.4.2-4
+* Mon Sep 19 2011 Steve Jenkins <steve stevejenkins com> 2.4.2-4
 - Use Fedora standard method to fix pkg supplied libtool (Todd Lyons)
 - Updated Summary and Description
 - Fixed default stats file location in sample config file
 - Install opendkim-reportstats and README.opendkim-reportstats
+- Changed default stop priority in init script
 
 * Mon Aug 22 2011 Steve Jenkins <steve stevejenkins com> 2.4.2-3
 - Mad props to Matt Domsch for sponsoring and providing feedback
