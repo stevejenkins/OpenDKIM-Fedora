@@ -84,12 +84,12 @@ Mode	v
 Syslog	yes
 
 # Log additional entries indicating successful signing or verification of messages.
-# SyslogSuccess	yes
+SyslogSuccess	yes
 
 # If logging is enabled, include detailed logging about why or why not a message was
-# signed or verified. This causes a large increase in the amount of log data generated
-# for each message, so it should be limited to debugging use only.
-#LogWhy	yes
+# signed or verified. This causes an increase in the amount of log data generated
+# for each message, so set this to No (or comment it out) if it gets too noisy.
+LogWhy	yes
 
 # Attempt to become the specified user before starting operations.
 UserID	%{name}:%{name}
@@ -261,6 +261,7 @@ rm -rf %{buildroot}
 - Changed default stop priority in init script
 - Added example SigningTable
 - Added sysconfig support for AUTOCREATE_DKIM_KEYS, DKIM_SELECTOR, DKIM_KEYDIR
+- Enabled SysLogSuccess and LogWhy by default
 
 * Mon Aug 22 2011 Steve Jenkins <steve stevejenkins com> 2.4.2-3
 - Mad props to Matt Domsch for sponsoring and providing feedback
