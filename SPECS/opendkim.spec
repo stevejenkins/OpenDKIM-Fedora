@@ -5,7 +5,7 @@
 Summary: A DomainKeys Identified Mail (DKIM) milter to sign and/or verify mail
 Name: opendkim
 Version: 2.4.2
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: BSD and Sendmail
 URL: http://opendkim.org/
 Group: System Environment/Daemons
@@ -168,6 +168,22 @@ cat > %{buildroot}%{_sysconfdir}/%{name}/SigningTable << 'EOF'
 #example.com default._domainkey.example.com
 EOF
 
+cat > %{buildroot}%{_sysconfdir}/%{name}/KeyTable << 'EOF'
+# To use this file, uncomment the #KeyTable option in %{_sysconfdir}/%{name}.conf,
+# then uncomment the following line and replace example.com with your domain
+# name, then restart OpenDKIM. Additional keys may be added on separate lines.
+
+#default._domainkey.example.com example.com:default:%{_sysconfdir}/%{name}/keys/default.private
+EOF
+
+cat > %{buildroot}%{_sysconfdir}/%{name}/TrustedHosts << 'EOF'
+# To use this file, uncomment the #ExternalIgnoreList and/or the #InternalHosts
+# option in %{_sysconfdir}/%{name}.conf then restart OpenDKIM. Additional hosts
+# may be added on separate lines (IP addresses, hostnames, or CIDR ranges).
+# The localhost IP (127.0.0.1) should be the first entry in this file.
+127.0.0.1
+EOF
+
 install -p -d %{buildroot}%{_sysconfdir}/tmpfiles.d
 cat > %{buildroot}%{_sysconfdir}/tmpfiles.d/%{name}.conf <<'EOF'
 D %{_localstatedir}/run/%{name} 0700 %{name} %{name} -
@@ -228,16 +244,18 @@ rm -rf %{buildroot}
 %doc contrib/stats/README.opendkim-reportstats
 %config(noreplace) %{_sysconfdir}/%{name}.conf
 %config(noreplace) %{_sysconfdir}/tmpfiles.d/%{name}.conf
-%config(noreplace) %attr(-,%{name},%{name}) %{_sysconfdir}/%{name}/SigningTable
-%{_sysconfdir}/sysconfig/%{name}
+%config(noreplace) %attr(640,%{name},%{name}) %{_sysconfdir}/%{name}/SigningTable
+%config(noreplace) %attr(640,%{name},%{name}) %{_sysconfdir}/%{name}/KeyTable
+%config(noreplace) %attr(640,%{name},%{name}) %{_sysconfdir}/%{name}/TrustedHosts
+%config(noreplace) %{_sysconfdir}/sysconfig/%{name}
 %{_initrddir}/%{name}
 %{_sbindir}/*
 %{_bindir}/*
 %{_mandir}/*/*
 %dir %attr(-,%{name},%{name}) %{_localstatedir}/spool/%{name}
 %dir %attr(-,%{name},%{name}) %{_localstatedir}/run/%{name}
-%dir %attr(-,%{name},%{name}) %{_sysconfdir}/%{name}
-%dir %attr(-,%{name},%{name}) %{_sysconfdir}/%{name}/keys
+%dir %attr(-,root,%{name}) %{_sysconfdir}/%{name}
+%dir %attr(-,root,%{name}) %{_sysconfdir}/%{name}/keys
 
 %files -n libopendkim
 %defattr(-,root,root)
@@ -253,6 +271,11 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
+* Thu Sep 22 2011 Steve Jenkins <steve stevejenkins com> 2.4.2-5
+- Changed ownernship of directories to comply with selinux-policy
+- Added default KeyTable and TrustedHosts files
+- Added config(noreplace) to sysconfig file
+
 * Mon Sep 19 2011 Steve Jenkins <steve stevejenkins com> 2.4.2-4
 - Use Fedora standard method to fix pkg supplied libtool (Todd Lyons)
 - Updated Summary and Description
