@@ -194,9 +194,9 @@ mkdir -p %{buildroot}%{_localstatedir}/run/%{name}
 mkdir -p %{buildroot}%{_sysconfdir}/%{name}
 mkdir %{buildroot}%{_sysconfdir}/%{name}/keys
 
-#install -m 0755 contrib/stats/%{name}-reportstats %{buildroot}%{_prefix}/bin/%{name}-reportstats
-#sed -i 's|^OPENDKIMSTATSDIR="/var/db/opendkim"|OPENDKIMSTATSDIR="%{_localstatedir}/spool/%{name}"|g' %{buildroot}%{_prefix}/bin/%{name}-reportstats
-#sed -i 's|^OPENDKIMDATOWNER="mailnull:mailnull"|OPENDKIMDATOWNER="%{name}:%{name}"|g' %{buildroot}%{_prefix}/bin/%{name}-reportstats
+install -m 0755 stats/%{name}-reportstats %{buildroot}%{_prefix}/bin/%{name}-reportstats
+sed -i 's|^OPENDKIMSTATSDIR="/var/db/opendkim"|OPENDKIMSTATSDIR="%{_localstatedir}/spool/%{name}"|g' %{buildroot}%{_prefix}/bin/%{name}-reportstats
+sed -i 's|^OPENDKIMDATOWNER="mailnull:mailnull"|OPENDKIMDATOWNER="%{name}:%{name}"|g' %{buildroot}%{_prefix}/bin/%{name}-reportstats
 
 chmod 0644 contrib/convert/convert_keylist.sh
 
@@ -270,6 +270,7 @@ rm -rf %{buildroot}
 * Wed Aug 22 2012 Steve Jenkins <steve stevejenkins com> 2.6.7-1
 - Updated to use 2.6.7 source code
 - Removed patches from 2.4.2 which were incorporated upstream
+- Changed install directory of opendkim-reportstats
 
 * Thu Sep 22 2011 Steve Jenkins <steve stevejenkins com> 2.4.2-5
 - Changed ownernship of directories to comply with selinux-policy
