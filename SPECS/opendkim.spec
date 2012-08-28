@@ -268,9 +268,15 @@ rm -rf %{buildroot}
 
 %changelog
 * Wed Aug 22 2012 Steve Jenkins <steve stevejenkins com> 2.6.7-1
-- Updated to use 2.6.7 source code
+- Updated to use newer upstream 2.6.7 source code
 - Removed patches from 2.4.2 which were incorporated upstream
-- Changed install directory of opendkim-reportstats
+- Updated install directory of opendkim-reportstats
+
+* Fri Jul 20 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2.4.2-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
+
+* Fri Jan 13 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2.4.2-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_17_Mass_Rebuild
 
 * Thu Sep 22 2011 Steve Jenkins <steve stevejenkins com> 2.4.2-5
 - Changed ownernship of directories to comply with selinux-policy
