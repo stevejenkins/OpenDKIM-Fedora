@@ -4,8 +4,8 @@
 
 Summary: A DomainKeys Identified Mail (DKIM) milter to sign and/or verify mail
 Name: opendkim
-Version: 2.4.2
-Release: 5%{?dist}
+Version: 2.6.7
+Release: 1%{?dist}
 License: BSD and Sendmail
 URL: http://opendkim.org/
 Group: System Environment/Daemons
@@ -16,8 +16,6 @@ Requires (preun): chkconfig, initscripts
 Requires (postun): initscripts
 BuildRequires: sendmail-devel, openssl-devel, pkgconfig
 Source0: http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
-Patch0: %{name}-%{version}-initscript.patch
-Patch1: %{name}-%{version}-installreadme.patch
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 %description
@@ -45,8 +43,6 @@ required for developing applications against libopendkim.
 
 %prep
 %setup -q
-%patch0 -p1
-%patch1 -p1
 
 %build
 %configure --enable-stats
@@ -198,7 +194,7 @@ mkdir -p %{buildroot}%{_localstatedir}/run/%{name}
 mkdir -p %{buildroot}%{_sysconfdir}/%{name}
 mkdir %{buildroot}%{_sysconfdir}/%{name}/keys
 
-install -m 0755 contrib/stats/%{name}-reportstats %{buildroot}%{_prefix}/bin/%{name}-reportstats
+install -m 0755 stats/%{name}-reportstats %{buildroot}%{_prefix}/bin/%{name}-reportstats
 sed -i 's|^OPENDKIMSTATSDIR="/var/db/opendkim"|OPENDKIMSTATSDIR="%{_localstatedir}/spool/%{name}"|g' %{buildroot}%{_prefix}/bin/%{name}-reportstats
 sed -i 's|^OPENDKIMDATOWNER="mailnull:mailnull"|OPENDKIMDATOWNER="%{name}:%{name}"|g' %{buildroot}%{_prefix}/bin/%{name}-reportstats
 
@@ -271,6 +267,17 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
+* Wed Aug 22 2012 Steve Jenkins <steve stevejenkins com> 2.6.7-1
+- Updated to use newer upstream 2.6.7 source code
+- Removed patches from 2.4.2 which were incorporated upstream
+- Updated install directory of opendkim-reportstats
+
+* Fri Jul 20 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2.4.2-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
+
+* Fri Jan 13 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2.4.2-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_17_Mass_Rebuild
+
 * Thu Sep 22 2011 Steve Jenkins <steve stevejenkins com> 2.4.2-5
 - Changed ownernship of directories to comply with selinux-policy
 - Added default KeyTable and TrustedHosts files
