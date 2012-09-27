@@ -4,7 +4,7 @@
 
 Summary: A DomainKeys Identified Mail (DKIM) milter to sign and/or verify mail
 Name: opendkim
-Version: 2.6.7
+Version: 2.7.0
 Release: 1%{?dist}
 License: BSD and Sendmail
 URL: http://opendkim.org/
@@ -14,8 +14,16 @@ Requires (pre): shadow-utils
 Requires (post): chkconfig
 Requires (preun): chkconfig, initscripts
 Requires (postun): initscripts
-BuildRequires: sendmail-devel, openssl-devel, pkgconfig
+
+BuildRequires: openssl-devel
+#BuildRequires: perl-DBI
+#BuildRequires: perl(DBD::mysql)
+BuildRequires: pkgconfig
+BuildRequires: sendmail-devel
+
 Source0: http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
+#Patch100: opendkim-2.7.0-rephistory.patch
+
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 %description
@@ -43,6 +51,7 @@ required for developing applications against libopendkim.
 
 %prep
 %setup -q
+#%patch100 -p1
 
 %build
 %configure --enable-stats
@@ -200,6 +209,15 @@ sed -i 's|^OPENDKIMDATOWNER="mailnull:mailnull"|OPENDKIMDATOWNER="%{name}:%{name
 
 chmod 0644 contrib/convert/convert_keylist.sh
 
+# Commented during testing - will be removed for release
+#for J in opendkim-expire opendkim-gengraphs opendkim-genstats opendkim-reportstats; do
+#test -f %{buildroot}%{_prefix}/sbin/$J && rm %{buildroot}%{_prefix}/sbin/$J || echo "Didn't find $J"
+#done
+#mv %{buildroot}%{_prefix}/sbin/opendkim-expire %{buildroot}%{_prefix}/bin/opendkim-expire
+
+# Builds properly if I uncomment the following line:
+rm %{buildroot}%{_prefix}/sbin/opendkim-expire
+
 %pre
 getent group %{name} >/dev/null || groupadd -r %{name}
 getent passwd %{name} >/dev/null || \
@@ -257,6 +275,8 @@ rm -rf %{buildroot}
 %defattr(-,root,root)
 %doc LICENSE LICENSE.Sendmail README
 %{_libdir}/libopendkim.so.*
+%{_libdir}/libstrl.so.*
+%{_includedir}/strl/strl.h
 
 %files -n libopendkim-devel
 %defattr(-,root,root)
@@ -267,6 +287,11 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
+* Tue Sep 25 2012 Steve Jenkins <steve stevejenkins com> 2.7.0.Beta0-1
+- Updated to use upstream 2.7.0.Beta0 source code
+- Added support for strlcat() and strlcopy() previously in libopendkim
+- Added additional build requirements for perl(DBI) and perl(DBD::mysql)
+
 * Wed Aug 22 2012 Steve Jenkins <steve stevejenkins com> 2.6.7-1
 - Updated to use newer upstream 2.6.7 source code
 - Removed patches from 2.4.2 which were incorporated upstream
