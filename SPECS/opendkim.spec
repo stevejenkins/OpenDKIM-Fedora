@@ -4,7 +4,7 @@
 
 Summary: A DomainKeys Identified Mail (DKIM) milter to sign and/or verify mail
 Name: opendkim
-Version: 2.6.7
+Version: 2.7.1
 Release: 1%{?dist}
 License: BSD and Sendmail
 URL: http://opendkim.org/
@@ -14,8 +14,13 @@ Requires (pre): shadow-utils
 Requires (post): chkconfig
 Requires (preun): chkconfig, initscripts
 Requires (postun): initscripts
-BuildRequires: sendmail-devel, openssl-devel, pkgconfig
+
+BuildRequires: openssl-devel
+BuildRequires: pkgconfig
+BuildRequires: sendmail-devel
+
 Source0: http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
+
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 %description
@@ -45,7 +50,8 @@ required for developing applications against libopendkim.
 %setup -q
 
 %build
-%configure --enable-stats
+#%configure --enable-stats
+%configure
 sed -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
 sed -i 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' libtool
 
@@ -98,6 +104,7 @@ Socket	inet:8891@localhost
 Umask	002
 
 # This specifies a text file in which to store DKIM transaction statistics.
+# OpenDKIM must be manually compiled with --enable-stats to enable this feature.
 #Statistics	%{_localstatedir}/spool/%{name}/stats.dat
 
 ## SIGNING OPTIONS
@@ -112,6 +119,9 @@ Canonicalization	relaxed/simple
 
 # Defines the name of the selector to be used when signing messages.
 Selector	default
+
+# Specifies the minimum number of key bits for acceptable keys and signatures.
+MinimumKeyBits 1024
 
 # Gives the location of a private key to be used for signing ALL messages.
 KeyFile	%{_sysconfdir}/%{name}/keys/default.private
@@ -194,9 +204,9 @@ mkdir -p %{buildroot}%{_localstatedir}/run/%{name}
 mkdir -p %{buildroot}%{_sysconfdir}/%{name}
 mkdir %{buildroot}%{_sysconfdir}/%{name}/keys
 
-install -m 0755 stats/%{name}-reportstats %{buildroot}%{_prefix}/bin/%{name}-reportstats
-sed -i 's|^OPENDKIMSTATSDIR="/var/db/opendkim"|OPENDKIMSTATSDIR="%{_localstatedir}/spool/%{name}"|g' %{buildroot}%{_prefix}/bin/%{name}-reportstats
-sed -i 's|^OPENDKIMDATOWNER="mailnull:mailnull"|OPENDKIMDATOWNER="%{name}:%{name}"|g' %{buildroot}%{_prefix}/bin/%{name}-reportstats
+install -m 0755 stats/%{name}-reportstats %{buildroot}%{_prefix}/sbin/%{name}-reportstats
+sed -i 's|^OPENDKIMSTATSDIR="/var/db/opendkim"|OPENDKIMSTATSDIR="%{_localstatedir}/spool/%{name}"|g' %{buildroot}%{_prefix}/sbin/%{name}-reportstats
+sed -i 's|^OPENDKIMDATOWNER="mailnull:mailnull"|OPENDKIMDATOWNER="%{name}:%{name}"|g' %{buildroot}%{_prefix}/sbin/%{name}-reportstats
 
 chmod 0644 contrib/convert/convert_keylist.sh
 
@@ -227,7 +237,6 @@ exit 0
 
 %postun -n libopendkim -p /sbin/ldconfig
 
-
 %clean
 rm -rf %{buildroot}
 
@@ -246,7 +255,6 @@ rm -rf %{buildroot}
 %config(noreplace) %{_sysconfdir}/sysconfig/%{name}
 %{_initrddir}/%{name}
 %{_sbindir}/*
-%{_bindir}/*
 %{_mandir}/*/*
 %dir %attr(-,%{name},%{name}) %{_localstatedir}/spool/%{name}
 %dir %attr(-,%{name},%{name}) %{_localstatedir}/run/%{name}
@@ -257,6 +265,8 @@ rm -rf %{buildroot}
 %defattr(-,root,root)
 %doc LICENSE LICENSE.Sendmail README
 %{_libdir}/libopendkim.so.*
+%{_libdir}/libstrl.so.*
+%{_includedir}/strl/strl.h
 
 %files -n libopendkim-devel
 %defattr(-,root,root)
@@ -267,6 +277,13 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
+* Tue Oct 30 2012 Steve Jenkins <steve stevejenkins com> 2.7.1-1
+- Updated to use newer upstream 2.7.1 source code
+- Updated to reflect source code move of files from /usr/bin to /usr/sbin
+- Removed --enable-stats configure option to avoid additional dependencies
+- Added support for strlcat() and strlcopy() previously in libopendkim
+- Added new MinimumKeyBits configuration option with default of 1024
+
 * Wed Aug 22 2012 Steve Jenkins <steve stevejenkins com> 2.6.7-1
 - Updated to use newer upstream 2.6.7 source code
 - Removed patches from 2.4.2 which were incorporated upstream
