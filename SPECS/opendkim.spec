@@ -16,13 +16,10 @@ Requires (preun): chkconfig, initscripts
 Requires (postun): initscripts
 
 BuildRequires: openssl-devel
-#BuildRequires: perl-DBI
-#BuildRequires: perl(DBD::mysql)
 BuildRequires: pkgconfig
 BuildRequires: sendmail-devel
 
 Source0: http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
-#Patch100: opendkim-2.7.0-rephistory.patch
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -51,11 +48,9 @@ required for developing applications against libopendkim.
 
 %prep
 %setup -q
-#%patch100 -p1
 
 %build
-#%configure --enable-stats
-%configure
+%configure --enable-stats
 sed -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
 sed -i 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' libtool
 
@@ -207,21 +202,11 @@ mkdir -p %{buildroot}%{_localstatedir}/run/%{name}
 mkdir -p %{buildroot}%{_sysconfdir}/%{name}
 mkdir %{buildroot}%{_sysconfdir}/%{name}/keys
 
-#install -m 0755 stats/%{name}-reportstats %{buildroot}%{_prefix}/bin/%{name}-reportstats
-#sed -i 's|^OPENDKIMSTATSDIR="/var/db/opendkim"|OPENDKIMSTATSDIR="%{_localstatedir}/spool/%{name}"|g' %{buildroot}%{_prefix}/bin/%{name}-reportstats
-#sed -i 's|^OPENDKIMDATOWNER="mailnull:mailnull"|OPENDKIMDATOWNER="%{name}:%{name}"|g' %{buildroot}%{_prefix}/bin/%{name}-reportstats
+install -m 0755 stats/%{name}-reportstats %{buildroot}%{_prefix}/sbin/%{name}-reportstats
+sed -i 's|^OPENDKIMSTATSDIR="/var/db/opendkim"|OPENDKIMSTATSDIR="%{_localstatedir}/spool/%{name}"|g' %{buildroot}%{_prefix}/sbin/%{name}-reportstats
+sed -i 's|^OPENDKIMDATOWNER="mailnull:mailnull"|OPENDKIMDATOWNER="%{name}:%{name}"|g' %{buildroot}%{_prefix}/sbin/%{name}-reportstats
 
 chmod 0644 contrib/convert/convert_keylist.sh
-
-# Commented during testing - will be removed for release
-#for J in opendkim-expire opendkim-gengraphs opendkim-genstats opendkim-reportstats; do
-#test -f %{buildroot}%{_prefix}/sbin/$J && rm %{buildroot}%{_prefix}/sbin/$J || echo "Didn't find $J"
-#done
-mkdir -p %{buildroot}%{_prefix}/bin
-mv %{buildroot}%{_prefix}/sbin/opendkim-genkey %{buildroot}%{_prefix}/bin/opendkim-genkey
-
-# Builds properly if I uncomment the following line:
-#rm %{buildroot}%{_prefix}/sbin/opendkim-expire
 
 %pre
 getent group %{name} >/dev/null || groupadd -r %{name}
@@ -250,7 +235,6 @@ exit 0
 
 %postun -n libopendkim -p /sbin/ldconfig
 
-
 %clean
 rm -rf %{buildroot}
 
@@ -269,7 +253,6 @@ rm -rf %{buildroot}
 %config(noreplace) %{_sysconfdir}/sysconfig/%{name}
 %{_initrddir}/%{name}
 %{_sbindir}/*
-%{_bindir}/*
 %{_mandir}/*/*
 %dir %attr(-,%{name},%{name}) %{_localstatedir}/spool/%{name}
 %dir %attr(-,%{name},%{name}) %{_localstatedir}/run/%{name}
@@ -292,11 +275,11 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
-* Mon Oct 29 2012 Steve Jenkins <steve stevejenkins com> 2.7.0-1
-- Updated to use newer upstream 2.7.0 source code
+* Mon Oct 29 2012 Steve Jenkins <steve stevejenkins com> 2.7.1-1
+- Updated to use newer upstream 2.7.1 source code
 - Added support for strlcat() and strlcopy() previously in libopendkim
-- Added additional build requirements for perl(DBD::mysql)
-- Added MinimumKeyBits default of 1024
+- Added new MinimumKeyBits configuration option with default of 1024
+- Updated to reflect source code move of /usr/bin files to /usr/sbin
 
 * Wed Aug 22 2012 Steve Jenkins <steve stevejenkins com> 2.6.7-1
 - Updated to use newer upstream 2.6.7 source code
