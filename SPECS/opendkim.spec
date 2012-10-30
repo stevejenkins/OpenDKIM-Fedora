@@ -123,6 +123,9 @@ Canonicalization	relaxed/simple
 # Defines the name of the selector to be used when signing messages.
 Selector	default
 
+# Specifies the minimum number of key bits for acceptable keys and signatures.
+MinimumKeyBits 1024
+
 # Gives the location of a private key to be used for signing ALL messages.
 KeyFile	%{_sysconfdir}/%{name}/keys/default.private
 
@@ -214,7 +217,8 @@ chmod 0644 contrib/convert/convert_keylist.sh
 #for J in opendkim-expire opendkim-gengraphs opendkim-genstats opendkim-reportstats; do
 #test -f %{buildroot}%{_prefix}/sbin/$J && rm %{buildroot}%{_prefix}/sbin/$J || echo "Didn't find $J"
 #done
-#mv %{buildroot}%{_prefix}/sbin/opendkim-expire %{buildroot}%{_prefix}/bin/opendkim-expire
+mkdir -p %{buildroot}%{_prefix}/bin
+mv %{buildroot}%{_prefix}/sbin/opendkim-genkey %{buildroot}%{_prefix}/bin/opendkim-genkey
 
 # Builds properly if I uncomment the following line:
 #rm %{buildroot}%{_prefix}/sbin/opendkim-expire
@@ -265,7 +269,7 @@ rm -rf %{buildroot}
 %config(noreplace) %{_sysconfdir}/sysconfig/%{name}
 %{_initrddir}/%{name}
 %{_sbindir}/*
-#%{_bindir}/*
+%{_bindir}/*
 %{_mandir}/*/*
 %dir %attr(-,%{name},%{name}) %{_localstatedir}/spool/%{name}
 %dir %attr(-,%{name},%{name}) %{_localstatedir}/run/%{name}
@@ -288,10 +292,11 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
-* Tue Sep 25 2012 Steve Jenkins <steve stevejenkins com> 2.7.0.Beta0-1
-- Updated to use upstream 2.7.0.Beta0 source code
+* Mon Oct 29 2012 Steve Jenkins <steve stevejenkins com> 2.7.0-1
+- Updated to use newer upstream 2.7.0 source code
 - Added support for strlcat() and strlcopy() previously in libopendkim
-- Added additional build requirements for perl(DBI) and perl(DBD::mysql)
+- Added additional build requirements for perl(DBD::mysql)
+- Added MinimumKeyBits default of 1024
 
 * Wed Aug 22 2012 Steve Jenkins <steve stevejenkins com> 2.6.7-1
 - Updated to use newer upstream 2.6.7 source code
