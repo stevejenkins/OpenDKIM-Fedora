@@ -4,7 +4,7 @@
 
 Summary: A DomainKeys Identified Mail (DKIM) milter to sign and/or verify mail
 Name: opendkim
-Version: 2.7.0
+Version: 2.7.1
 Release: 1%{?dist}
 License: BSD and Sendmail
 URL: http://opendkim.org/
@@ -104,6 +104,7 @@ Socket	inet:8891@localhost
 Umask	002
 
 # This specifies a text file in which to store DKIM transaction statistics.
+# OpenDKIM must be manually compiled with --enable-stats to enable this feature.
 #Statistics	%{_localstatedir}/spool/%{name}/stats.dat
 
 ## SIGNING OPTIONS
@@ -276,11 +277,12 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
-* Mon Oct 29 2012 Steve Jenkins <steve stevejenkins com> 2.7.1-1
+* Tue Oct 30 2012 Steve Jenkins <steve stevejenkins com> 2.7.1-1
 - Updated to use newer upstream 2.7.1 source code
+- Updated to reflect source code move of files from /usr/bin to /usr/sbin
+- Removed --enable-stats configure option to avoid additional dependencies
 - Added support for strlcat() and strlcopy() previously in libopendkim
 - Added new MinimumKeyBits configuration option with default of 1024
-- Updated to reflect source code move of /usr/bin files to /usr/sbin
 
 * Wed Aug 22 2012 Steve Jenkins <steve stevejenkins com> 2.6.7-1
 - Updated to use newer upstream 2.6.7 source code
