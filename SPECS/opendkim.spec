@@ -5,7 +5,7 @@
 Summary: A DomainKeys Identified Mail (DKIM) milter to sign and/or verify mail
 Name: opendkim
 Version: 2.7.3
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: BSD and Sendmail
 URL: http://opendkim.org/
 Group: System Environment/Daemons
@@ -259,7 +259,7 @@ rm -rf %{buildroot}
 %dir %attr(-,%{name},%{name}) %{_localstatedir}/spool/%{name}
 %dir %attr(-,%{name},%{name}) %{_localstatedir}/run/%{name}
 %dir %attr(-,root,%{name}) %{_sysconfdir}/%{name}
-%dir %attr(-,root,%{name}) %{_sysconfdir}/%{name}/keys
+%dir %attr(750,root,%{name}) %{_sysconfdir}/%{name}/keys
 
 %files -n libopendkim
 %defattr(-,root,root)
@@ -267,6 +267,7 @@ rm -rf %{buildroot}
 %{_libdir}/libopendkim.so.*
 %{_libdir}/libstrl.so.*
 %{_includedir}/strl/strl.h
+
 
 %files -n libopendkim-devel
 %defattr(-,root,root)
@@ -277,6 +278,9 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
+* Tue Dec 04 2012 Steve Jenkins <steve stevejenkins com> 2.7.3-2
+- Set /etc/opendkim/keys default permissions to 750 (Thanks patrick at puzzled.xs4al.nl)
+
 * Thu Nov 29 2012 Steve Jenkins <steve stevejenkins com> 2.7.3-1
 - Updated to use newer upstream 2.7.3 source code
 
