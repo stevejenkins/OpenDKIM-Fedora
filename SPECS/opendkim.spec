@@ -285,7 +285,7 @@ rm -rf %{buildroot}
 
 %changelog
 * Tue Jan 08 2013 Steve Jenkins <steve stevejenkins com> 2.7.4-1
-- Updated to user newer upstream 2.7.4 source code
+- Updated to use newer upstream 2.7.4 source code
 - Added AutoRestart and AutoRestartRate directives to default configuration
 - Changed default SigningTable directive to include refile: for wildcard support
 
