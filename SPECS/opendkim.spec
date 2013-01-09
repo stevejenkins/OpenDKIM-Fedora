@@ -4,8 +4,8 @@
 
 Summary: A DomainKeys Identified Mail (DKIM) milter to sign and/or verify mail
 Name: opendkim
-Version: 2.7.3
-Release: 2%{?dist}
+Version: 2.7.4
+Release: 1%{?dist}
 License: BSD and Sendmail
 URL: http://opendkim.org/
 Group: System Environment/Daemons
@@ -79,6 +79,12 @@ cat > %{buildroot}%{_sysconfdir}/%{name}.conf << 'EOF'
 # Specifies the path to the process ID file.
 PidFile	%{_localstatedir}/run/%{name}/%{name}.pid
 
+# Determines whether to automatically restart if the process dies unexpectedly
+AutoRestart	yes
+
+# Limits the number of automatic restarts allowed per any given time period
+AutoRestartRate	5/1h
+
 # Selects operating modes. Valid modes are s (signer) and v (verifier). Default is v.
 Mode	v
 
@@ -134,7 +140,7 @@ KeyFile	%{_sysconfdir}/%{name}/keys/default.private
 # Defines a table used to select one or more signatures to apply to a message based
 # on the address found in the From: header field. In simple terms, this tells
 # OpenDKIM how to use your keys.  
-#SigningTable	%{_sysconfdir}/%{name}/SigningTable
+#SigningTable	refile:%{_sysconfdir}/%{name}/SigningTable
 
 # Identifies a set of "external" hosts that may send mail through the server as one
 # of the signing domains without credentials as such.
@@ -278,6 +284,11 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
+* Tue Jan 08 2013 Steve Jenkins <steve stevejenkins com> 2.7.4-1
+- Updated to use newer upstream 2.7.4 source code
+- Added AutoRestart and AutoRestartRate directives to default configuration
+- Changed default SigningTable directive to include refile: for wildcard support
+
 * Tue Dec 04 2012 Steve Jenkins <steve stevejenkins com> 2.7.3-2
 - Set /etc/opendkim/keys default permissions to 750 (Thanks patrick at puzzled.xs4al.nl)
 
