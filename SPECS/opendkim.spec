@@ -21,8 +21,6 @@ BuildRequires: sendmail-devel
 
 Source0: http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
 
-# Patch0: opendkim-c.patch
-
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 %description
@@ -50,7 +48,6 @@ required for developing applications against libopendkim.
 
 %prep
 %setup -q
-# %patch0 -p1
 
 %build
 #%configure --enable-stats
@@ -305,7 +302,7 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
-* Sat Feb 09 2013 Steve Jenkins <steve stevejenkins com> 2.8.0-1
+* Mon Feb 11 2013 Steve Jenkins <steve stevejenkins com> 2.8.0-1
 - Updated to use newer upstream 2.8.0 source code
 - Edited various comments in default configuration files
 
