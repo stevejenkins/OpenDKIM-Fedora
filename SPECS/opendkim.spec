@@ -79,12 +79,6 @@ cat > %{buildroot}%{_sysconfdir}/%{name}.conf << 'EOF'
 # Specifies the path to the process ID file.
 PidFile	%{_localstatedir}/run/%{name}/%{name}.pid
 
-# Determines whether to automatically restart if the process dies unexpectedly.
-AutoRestart	yes
-
-# Limits the number of automatic restarts allowed per any given time period
-AutoRestartRate	5/1h
-
 # Selects operating modes. Valid modes are s (sign) and v (verify). Default is v.
 # Must be changed to s (sign only) or sv (sign and verify) in order to sign outgoing
 # messages.
@@ -155,14 +149,17 @@ EOF
 
 mkdir -p %{buildroot}%{_sysconfdir}/sysconfig
 cat > %{buildroot}%{_sysconfdir}/sysconfig/%{name} << 'EOF'
-# Uncomment the following line to disable automatic DKIM key creation on start.
-#AUTOCREATE_DKIM_KEYS=NO
-#
-# Uncomment the following line to set the default DKIM selector.
-#DKIM_SELECTOR=default
-#
-# Uncomment the following to set the default DKIM key directory.
-#DKIM_KEYDIR=/etc/opendkim/keys
+# Set the necessary startup options
+OPTIONS="-x /etc/opendkim.conf -P /var/run/opendkim/opendkim.pid"
+
+# Determine whether default DKIM keys are automatically created on start
+AUTOCREATE_DKIM_KEYS=YES
+
+# Set the default DKIM selector
+DKIM_SELECTOR=default
+
+# Set the default DKIM key location
+DKIM_KEYDIR=/etc/opendkim/keys
 EOF
 
 mkdir -p %{buildroot}%{_sysconfdir}/%{name}
@@ -302,9 +299,15 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
-* Mon Feb 11 2013 Steve Jenkins <steve stevejenkins com> 2.8.0-1
+* Thu Feb 21 2013 Steve Jenkins <steve stevejenkins com> 2.8.0-1
+- Happy Birthday to me! :)
 - Updated to use newer upstream 2.8.0 source code
-- Edited various comments in default configuration files
+- Made following edits in anticipation of supporting systemd .service file
+- Edited comments in default configuration files
+- Changed default values in EnvironmentFile (/etc/sysconfig/opendkim)
+- Moved program startup options into EnvironmentFile
+- Moved default key generation to external script (opendkim-default-keygen)
+- Removed AutoRestart directives from default config (systemd will handle)
 
 * Tue Jan 08 2013 Steve Jenkins <steve stevejenkins com> 2.7.4-1
 - Updated to use newer upstream 2.7.4 source code
