@@ -24,8 +24,8 @@ BuildRequires: pkgconfig
 BuildRequires: sendmail-devel
 
 Source0: http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
-Source1: opendkim.service
-Source2: opendkim-default-keygen
+Source1: %{name}.service
+Source2: %{name}-default-keygen
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -52,11 +52,25 @@ Requires: libopendkim = %{version}-%{release}
 This package contains the static libraries, headers, and other support files
 required for developing applications against libopendkim.
 
+%package opendkim-sysvinit
+Summary: The SysV init script to manage the OpenDKIM milter.
+Group: System Environmnt/Daemons
+Requires: %{name} = %{version}-%{release}
+
+%description opendkim-sysvinit
+OpenDKIM allows signing and/or verification of email through an open source
+library that implements the DKIM service, plus a milter-based filter
+application that can plug in to any milter-aware MTA, including sendmail,
+Postfix, or any other MTA that supports the milter protocol. This package
+contains the SysV init script to manage the OpenDKIM milter when running a
+legacy SysV-compatible init system.
+
+It is not required when the init system used is systemd.
+
 %prep
 %setup -q
 
 %build
-#%configure --enable-stats
 %configure
 sed -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
 sed -i 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' libtool
@@ -65,13 +79,14 @@ sed -i 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' libtool
 rm -rf %{buildroot}
 
 make DESTDIR=%{buildroot} install %{?_smp_mflags}
-mkdir -p %{buildroot}%{_sysconfdir}
-#mkdir -p %{buildroot}%{_initrddir}
+install -d %{buildroot}%{_sysconfdir}
+install -d %{buildroot}%{_sysconfdir}/sysconfig
+install -d %{buildroot}%{_initrddir}
 install -d -m 0755 %{buildroot}%{_unitdir}
-#install -m 0755 contrib/init/redhat/%{name} %{buildroot}%{_initrddir}/%{name}
-#install -m 0644 contrib/init/redhat/%{name}.service %{buildroot}%{_unitdir}/%{name}.service
-install -m 0644 %{SOURCE1} %{buildroot}%{_unitdir}/opendkim.service
-install -m 0755 %{SOURCE2} %{buildroot}%{_sbindir}/opendkim-default-keygen
+install -m 0755 contrib/init/redhat/%{name} %{buildroot}%{_initrddir}/%{name}
+#install -m 0644 contrib/init/systemd/%{name}.service %{buildroot}%{_unitdir}/%{name}.service
+install -m 0644 %{SOURCE1} %{buildroot}%{_unitdir}/%{name}.service
+install -m 0755 %{SOURCE2} %{buildroot}%{_sbindir}/%{name}-default-keygen
 
 cat > %{buildroot}%{_sysconfdir}/%{name}.conf << 'EOF'
 ## BASIC OPENDKIM CONFIGURATION FILE
@@ -158,7 +173,6 @@ KeyFile	%{_sysconfdir}/%{name}/keys/default.private
 #InternalHosts	refile:%{_sysconfdir}/%{name}/TrustedHosts
 EOF
 
-mkdir -p %{buildroot}%{_sysconfdir}/sysconfig
 cat > %{buildroot}%{_sysconfdir}/sysconfig/%{name} << 'EOF'
 # Set the necessary startup options
 OPTIONS="-x %{_sysconfdir}/%{name}.conf -P %{_localstatedir}/run/%{name}/%{name}.pid"
@@ -251,10 +265,10 @@ exit 0
 
 %post
 #/sbin/chkconfig --add %{name} || :
-#%systemd_post opendkim.service
+#%systemd_post %{name}.service
 if [ $1 -eq 1 ] ; then 
     # Initial installation 
-    /bin/systemctl enable opendkim.service >/dev/null 2>&1 || :
+    /bin/systemctl enable %{name}.service >/dev/null 2>&1 || :
 fi
 
 %preun
@@ -266,8 +280,8 @@ fi
 #%systemd_preun %{name}.service
 if [ $1 -eq 0 ] ; then
     # Package removal, not upgrade
-    /bin/systemctl --no-reload disable opendkim.service > /dev/null 2>&1 || :
-    /bin/systemctl stop opendkim.service > /dev/null 2>&1 || :
+    /bin/systemctl --no-reload disable %{name}.service > /dev/null 2>&1 || :
+    /bin/systemctl stop %{name}.service > /dev/null 2>&1 || :
 fi
 
 %postun
@@ -279,14 +293,17 @@ fi
 /bin/systemctl daemon-reload >/dev/null 2>&1 || :
 if [ $1 -ge 1 ] ; then
     # Package upgrade, not uninstall
-    /bin/systemctl try-restart opendkim.service >/dev/null 2>&1 || :
+    /bin/systemctl try-restart %{name}.service >/dev/null 2>&1 || :
 fi
 
-%triggerun -- opendkim < 2.8.0-1
-/usr/bin/systemd-sysv-convert --save opendkim >/dev/null 2>&1 || :
-/bin/systemctl enable opendkim.service >/dev/null 2>&1
-/sbin/chkconfig --del opendkim >/dev/null 2>&1 || :
-/bin/systemctl try-restart opendkim.service >/dev/null 2>&1 || :
+%triggerun -- %{name} < 2.8.0-1
+/usr/bin/systemd-sysv-convert --save %{name} >/dev/null 2>&1 || :
+/bin/systemctl enable %{name}.service >/dev/null 2>&1
+/sbin/chkconfig --del %{name} >/dev/null 2>&1 || :
+/bin/systemctl try-restart %{name}.service >/dev/null 2>&1 || :
+
+%triggerpostun %{name}-sysvinit -- %{name} < 2.8.0-1
+/sbin/chkconfig --add %{name} >/dev/null 2>&1 || :
 
 %post -n libopendkim -p /sbin/ldconfig
 
@@ -308,7 +325,6 @@ rm -rf %{buildroot}
 %config(noreplace) %attr(640,%{name},%{name}) %{_sysconfdir}/%{name}/KeyTable
 %config(noreplace) %attr(640,%{name},%{name}) %{_sysconfdir}/%{name}/TrustedHosts
 %config(noreplace) %{_sysconfdir}/sysconfig/%{name}
-#%{_initrddir}/%{name}
 %{_sbindir}/*
 %{_mandir}/*/*
 %dir %attr(-,%{name},%{name}) %{_localstatedir}/spool/%{name}
@@ -317,6 +333,11 @@ rm -rf %{buildroot}
 %dir %attr(750,root,%{name}) %{_sysconfdir}/%{name}/keys
 %attr(0644,root,root) %{_unitdir}/%{name}.service
 %attr(0755,root,root) %{_sbindir}/%{name}-default-keygen
+
+%files opendkim-sysvinit
+%defattr(-,root,root)
+#%{_initrddir}/%{name}
+%attr(0755,root,root) %{_initrddir}/%{name}
 
 %files -n libopendkim
 %defattr(-,root,root)
@@ -346,6 +367,7 @@ rm -rf %{buildroot}
 - Moved program startup options into EnvironmentFile
 - Moved default key check and generation on startup to external script
 - Removed AutoRestart directives from default config (systemd will handle)
+- Incorporated additional variable names throughout spec file
 
 * Tue Jan 08 2013 Steve Jenkins <steve stevejenkins com> 2.7.4-1
 - Updated to use newer upstream 2.7.4 source code
