@@ -9,7 +9,7 @@ This git repo contains:
 
 - contrib/init/redhat/opendkim.in - Template file to build the OpenDKIM SysV init script (contributed to OpenDKIM source)
 
-- contrib/init/redhat/opendkim.service.in - Template file to build the OpenDKIM systemd service file (contributed to OpenDKIM source)
+- contrib/init/redhat/opendkim.service.in - Template file to build the OpenDKIM systemd service unit file (contributed to OpenDKIM source)
 
 - contrib/init/redhat/opendkim-default-keygen.in - Template file to build the external script that generates default DKIM keys on startup (contributed to OpenDKIM source)
 
@@ -18,6 +18,10 @@ CONTRIBUTORS: Please do pull requests in the "develop" branch only. The "master"
 For official source code and documentation, please visit http://opendkim.org/
 
 Steve Jenkins
-http://stevejenkins.com/ - http://stevej.fedorapeople.org/
 
-
+Find me at:
+- http://stevejenkins.com/
+- http://stevej.fedorapeople.org/
+- http://linkedin.com/in/sjjenkins/
+- http://facebook.com/SteveJenkinsBiz
+- http://twitter.com/sjjenkins/
