@@ -1,7 +1,7 @@
 [Unit]
 Description=DomainKeys Identified Mail (DKIM) Milter
 Documentation=man:opendkim(8) man:opendkim.conf(5) man:opendkim-genkey(8) man:opendkim-genzone(8) man:opendkim-testadsp(8) man:opendkim-testkey http://www.opendkim.org/docs.html
-After=syslog.target
+After=syslog.target network.target nss-lookup.target
 
 [Service]
 Type=forking
