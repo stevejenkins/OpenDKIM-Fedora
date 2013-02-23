@@ -52,12 +52,12 @@ Requires: libopendkim = %{version}-%{release}
 This package contains the static libraries, headers, and other support files
 required for developing applications against libopendkim.
 
-%package opendkim-sysvinit
+%package sysvinit
 Summary: The SysV init script to manage the OpenDKIM milter.
 Group: System Environmnt/Daemons
 Requires: %{name} = %{version}-%{release}
 
-%description opendkim-sysvinit
+%description sysvinit
 OpenDKIM allows signing and/or verification of email through an open source
 library that implements the DKIM service, plus a milter-based filter
 application that can plug in to any milter-aware MTA, including sendmail,
@@ -302,7 +302,7 @@ fi
 /sbin/chkconfig --del %{name} >/dev/null 2>&1 || :
 /bin/systemctl try-restart %{name}.service >/dev/null 2>&1 || :
 
-%triggerpostun %{name}-sysvinit -- %{name} < 2.8.0-1
+%triggerpostun -n opendkim-sysvinit -- %{name} < 2.8.0-1
 /sbin/chkconfig --add %{name} >/dev/null 2>&1 || :
 
 %post -n libopendkim -p /sbin/ldconfig
@@ -334,7 +334,7 @@ rm -rf %{buildroot}
 %attr(0644,root,root) %{_unitdir}/%{name}.service
 %attr(0755,root,root) %{_sbindir}/%{name}-default-keygen
 
-%files opendkim-sysvinit
+%files sysvinit
 %defattr(-,root,root)
 #%{_initrddir}/%{name}
 %attr(0755,root,root) %{_initrddir}/%{name}
@@ -359,7 +359,7 @@ rm -rf %{buildroot}
 * Thu Feb 21 2013 Steve Jenkins <steve stevejenkins com> 2.8.0-1
 - Happy Birthday to me! :)
 - Updated to use newer upstream 2.8.0 source code
-- Migration from SysV initscript to systemd unit file (for F18+)
+- Migration from SysV initscript to systemd unit file
 - Added systemd build requirement
 - Edited comments in default configuration files
 - Changed default Canonicalization to relaxed/relaxed in config file
