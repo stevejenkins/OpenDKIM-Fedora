@@ -112,7 +112,7 @@ Umask	002
 ## SIGNING OPTIONS
 
 # Selects the canonicalization method(s) to be used when signing messages.
-Canonicalization	relaxed/simple
+Canonicalization	relaxed/relaxed
 
 # Domain(s) whose mail should be signed by this filter. Mail from other domains will
 # be verified rather than being signed. Uncomment and use your domain name.
@@ -302,6 +302,7 @@ rm -rf %{buildroot}
 * Thu Feb 21 2013 Steve Jenkins <steve stevejenkins com> 2.8.0-1
 - Happy Birthday to me! :)
 - Updated to use newer upstream 2.8.0 source code
+- Changed default Canonicalization to relaxed/relaxed
 - Made following edits in anticipation of supporting systemd .service file
 - Edited comments in default configuration files
 - Changed default values in EnvironmentFile (/etc/sysconfig/opendkim)
