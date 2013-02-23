@@ -264,19 +264,16 @@ getent passwd %{name} >/dev/null || \
 exit 0
 
 %post
-#/sbin/chkconfig --add %{name} || :
 #%systemd_post %{name}.service
 if [ $1 -eq 1 ] ; then 
     # Initial installation 
     /bin/systemctl enable %{name}.service >/dev/null 2>&1 || :
 fi
 
+%post sysvinit
+/sbin/chkconfig --add %{name} || :
+
 %preun
-#if [ $1 -eq 0 ]; then
-#	service %{name} stop >/dev/null || :
-#	/sbin/chkconfig --del %{name} || :
-#fi
-#exit 0
 #%systemd_preun %{name}.service
 if [ $1 -eq 0 ] ; then
     # Package removal, not upgrade
@@ -284,17 +281,26 @@ if [ $1 -eq 0 ] ; then
     /bin/systemctl stop %{name}.service > /dev/null 2>&1 || :
 fi
 
+%preun sysvinit
+if [ $1 -eq 0 ]; then
+	service %{name} stop >/dev/null || :
+	/sbin/chkconfig --del %{name} || :
+fi
+exit 0
+
 %postun
-#if [ "$1" -ge "1" ] ; then
-#	/sbin/service %{name} condrestart >/dev/null 2>&1 || :
-#fi
-#exit 0
 #%systemd_postun_with_restart %{name}.service
 /bin/systemctl daemon-reload >/dev/null 2>&1 || :
 if [ $1 -ge 1 ] ; then
     # Package upgrade, not uninstall
     /bin/systemctl try-restart %{name}.service >/dev/null 2>&1 || :
 fi
+
+%postun sysvinit
+if [ "$1" -ge "1" ] ; then
+	/sbin/service %{name} condrestart >/dev/null 2>&1 || :
+fi
+exit 0
 
 %triggerun -- %{name} < 2.8.0-1
 /usr/bin/systemd-sysv-convert --save %{name} >/dev/null 2>&1 || :
