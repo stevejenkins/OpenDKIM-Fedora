@@ -251,7 +251,11 @@ exit 0
 
 %post
 #/sbin/chkconfig --add %{name} || :
-%systemd_post opendkim.service
+#%systemd_post opendkim.service
+if [ $1 -eq 1 ] ; then 
+    # Initial installation 
+    /bin/systemctl enable opendkim.service >/dev/null 2>&1 || :
+fi
 
 %preun
 #if [ $1 -eq 0 ]; then
@@ -259,14 +263,24 @@ exit 0
 #	/sbin/chkconfig --del %{name} || :
 #fi
 #exit 0
-%systemd_preun %{name}.service
+#%systemd_preun %{name}.service
+if [ $1 -eq 0 ] ; then
+    # Package removal, not upgrade
+    /bin/systemctl --no-reload disable opendkim.service > /dev/null 2>&1 || :
+    /bin/systemctl stop opendkim.service > /dev/null 2>&1 || :
+fi
 
 %postun
 #if [ "$1" -ge "1" ] ; then
 #	/sbin/service %{name} condrestart >/dev/null 2>&1 || :
 #fi
 #exit 0
-%systemd_postun_with_restart %{name}.service
+#%systemd_postun_with_restart %{name}.service
+/bin/systemctl daemon-reload >/dev/null 2>&1 || :
+if [ $1 -ge 1 ] ; then
+    # Package upgrade, not uninstall
+    /bin/systemctl try-restart opendkim.service >/dev/null 2>&1 || :
+fi
 
 %triggerun -- opendkim < 2.8.0-1
 /usr/bin/systemd-sysv-convert --save opendkim >/dev/null 2>&1 || :
