@@ -11,15 +11,21 @@ URL: http://opendkim.org/
 Group: System Environment/Daemons
 Requires: lib%{name} = %{version}-%{release}
 Requires (pre): shadow-utils
-Requires (post): chkconfig
-Requires (preun): chkconfig, initscripts
-Requires (postun): initscripts
+Requires (post): systemd-units
+Requires (preun): systemd-units
+Requires (postun): systemd-units
+# This is actually needed for the %triggerun script but Requires(triggerun)
+# is not valid.  We can use %post because this particular %triggerun script
+# should fire just after this package is installed.
+Requires (post): systemd-sysv
 
 BuildRequires: openssl-devel
 BuildRequires: pkgconfig
 BuildRequires: sendmail-devel
 
 Source0: http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
+Source1: opendkim.service
+Source2: opendkim-default-keygen
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -60,11 +66,16 @@ rm -rf %{buildroot}
 
 make DESTDIR=%{buildroot} install %{?_smp_mflags}
 mkdir -p %{buildroot}%{_sysconfdir}
-mkdir -p %{buildroot}%{_initrddir}
-install -m 0755 contrib/init/redhat/opendkim %{buildroot}%{_initrddir}/%{name}
+#mkdir -p %{buildroot}%{_initrddir}
+install -d -m 0755 %{buildroot}%{_unitdir}
+#install -m 0755 contrib/init/redhat/%{name} %{buildroot}%{_initrddir}/%{name}
+#install -m 0644 contrib/init/redhat/%{name}.service %{buildroot}%{_unitdir}/%{name}.service
+install -m 0644 %{SOURCE1} %{buildroot}%{_unitdir}/opendkim.service
+install -m 0755 %{SOURCE2} %{buildroot}%{_sbindir}/opendkim-default-keygen
+
 cat > %{buildroot}%{_sysconfdir}/%{name}.conf << 'EOF'
 ## BASIC OPENDKIM CONFIGURATION FILE
-## See opendkim.conf(5) or %{_docdir}/%{name}-%{version}/%{name}.conf.sample for more
+## See %{name}.conf(5) or %{_docdir}/%{name}-%{version}/%{name}.conf.sample for more
 
 ## BEFORE running OpenDKIM you must:
 
@@ -150,7 +161,7 @@ EOF
 mkdir -p %{buildroot}%{_sysconfdir}/sysconfig
 cat > %{buildroot}%{_sysconfdir}/sysconfig/%{name} << 'EOF'
 # Set the necessary startup options
-OPTIONS="-x /etc/opendkim.conf -P /var/run/opendkim/opendkim.pid"
+OPTIONS="-x %{_sysconfdir}/%{name}.conf -P %{_localstatedir}/run/%{name}/%{name}.pid"
 
 # Determine whether default DKIM keys are automatically created on start
 AUTOCREATE_DKIM_KEYS=YES
@@ -159,7 +170,7 @@ AUTOCREATE_DKIM_KEYS=YES
 DKIM_SELECTOR=default
 
 # Set the default DKIM key location
-DKIM_KEYDIR=/etc/opendkim/keys
+DKIM_KEYDIR=%{_sysconfdir}/%{name}/keys
 EOF
 
 mkdir -p %{buildroot}%{_sysconfdir}/%{name}
@@ -185,7 +196,7 @@ cat > %{buildroot}%{_sysconfdir}/%{name}/SigningTable << 'EOF'
 # wildcards will not work. Instead, full user@host is checked first, then simply host,
 # then user@.domain (with all superdomains checked in sequence, so "foo.example.com"
 # would first check "user@foo.example.com", then "user@.example.com", then "user@.com"),
-# then .domain, then user@*, and finally *. See the opendkim.conf(5) man page under
+# then .domain, then user@*, and finally *. See the %{name}.conf(5) man page under
 # "SigningTable" for more details.
 
 #example.com default._domainkey.example.com
@@ -239,22 +250,31 @@ getent passwd %{name} >/dev/null || \
 exit 0
 
 %post
-/sbin/chkconfig --add %{name} || :
-
-%post -n libopendkim -p /sbin/ldconfig
+#/sbin/chkconfig --add %{name} || :
+%systemd_post opendkim.service
 
 %preun
-if [ $1 -eq 0 ]; then
-	service %{name} stop >/dev/null || :
-	/sbin/chkconfig --del %{name} || :
-fi
-exit 0
+#if [ $1 -eq 0 ]; then
+#	service %{name} stop >/dev/null || :
+#	/sbin/chkconfig --del %{name} || :
+#fi
+#exit 0
+%systemd_preun %{name}.service
 
 %postun
-if [ "$1" -ge "1" ] ; then
-	/sbin/service %{name} condrestart >/dev/null 2>&1 || :
-fi
-exit 0
+#if [ "$1" -ge "1" ] ; then
+#	/sbin/service %{name} condrestart >/dev/null 2>&1 || :
+#fi
+#exit 0
+%systemd_postun_with_restart %{name}.service
+
+%triggerun -- opendkim < 2.8.0-1
+/usr/bin/systemd-sysv-convert --save opendkim >/dev/null 2>&1 || :
+/bin/systemctl enable opendkim.service >/dev/null 2>&1
+/sbin/chkconfig --del opendkim >/dev/null 2>&1 || :
+/bin/systemctl try-restart opendkim.service >/dev/null 2>&1 || :
+
+%post -n libopendkim -p /sbin/ldconfig
 
 %postun -n libopendkim -p /sbin/ldconfig
 
@@ -267,20 +287,22 @@ rm -rf %{buildroot}
 %doc contrib/convert/convert_keylist.sh %{name}/*.sample
 %doc %{name}/%{name}.conf.simple-verify %{name}/%{name}.conf.simple
 %doc %{name}/README contrib/lua/*.lua
-%doc contrib/stats/README.opendkim-reportstats
+%doc contrib/stats/README.%{name}-reportstats
 %config(noreplace) %{_sysconfdir}/%{name}.conf
 %config(noreplace) %{_sysconfdir}/tmpfiles.d/%{name}.conf
 %config(noreplace) %attr(640,%{name},%{name}) %{_sysconfdir}/%{name}/SigningTable
 %config(noreplace) %attr(640,%{name},%{name}) %{_sysconfdir}/%{name}/KeyTable
 %config(noreplace) %attr(640,%{name},%{name}) %{_sysconfdir}/%{name}/TrustedHosts
 %config(noreplace) %{_sysconfdir}/sysconfig/%{name}
-%{_initrddir}/%{name}
+#%{_initrddir}/%{name}
 %{_sbindir}/*
 %{_mandir}/*/*
 %dir %attr(-,%{name},%{name}) %{_localstatedir}/spool/%{name}
 %dir %attr(-,%{name},%{name}) %{_localstatedir}/run/%{name}
 %dir %attr(-,root,%{name}) %{_sysconfdir}/%{name}
 %dir %attr(750,root,%{name}) %{_sysconfdir}/%{name}/keys
+%attr(0644,root,root) %{_unitdir}/%{name}.service
+%attr(0755,root,root) %{_sbindir}/%{name}-default-keygen
 
 %files -n libopendkim
 %defattr(-,root,root)
@@ -302,12 +324,13 @@ rm -rf %{buildroot}
 * Thu Feb 21 2013 Steve Jenkins <steve stevejenkins com> 2.8.0-1
 - Happy Birthday to me! :)
 - Updated to use newer upstream 2.8.0 source code
-- Changed default Canonicalization to relaxed/relaxed
-- Made following edits in anticipation of supporting systemd .service file
+- Migration from SysV initscript to systemd unit file (for F18+)
+- Added systemd build requirement
 - Edited comments in default configuration files
-- Changed default values in EnvironmentFile (/etc/sysconfig/opendkim)
+- Changed default Canonicalization to relaxed/relaxed in config file
+- Changed default values in EnvironmentFile
 - Moved program startup options into EnvironmentFile
-- Moved default key generation to external script (opendkim-default-keygen)
+- Moved default key check and generation on startup to external script
 - Removed AutoRestart directives from default config (systemd will handle)
 
 * Tue Jan 08 2013 Steve Jenkins <steve stevejenkins com> 2.7.4-1
