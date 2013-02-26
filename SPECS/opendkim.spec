@@ -5,7 +5,7 @@
 Summary: A DomainKeys Identified Mail (DKIM) milter to sign and/or verify mail
 Name: opendkim
 Version: 2.8.0
-Release: 1%{?dist}
+Release: 3%{?dist}
 License: BSD and Sendmail
 URL: http://opendkim.org/
 Group: System Environment/Daemons
@@ -24,8 +24,6 @@ BuildRequires: pkgconfig
 BuildRequires: sendmail-devel
 
 Source0: http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
-#Source1: %{name}.service
-#Source2: %{name}-default-keygen
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -341,7 +339,6 @@ rm -rf %{buildroot}
 
 %files sysvinit
 %defattr(-,root,root)
-#%{_initrddir}/%{name}
 %attr(0755,root,root) %{_initrddir}/%{name}
 
 %files -n libopendkim
@@ -361,6 +358,14 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
+* Tue Feb 26 2013 Steve Jenkins <steve stevejenkins com> 2.8.0-3
+- Split into two spec files: systemd (F17+) and SysV (EL5-6)
+- systemd-only: Removed leading / from unitdir variables
+- Removed commented source lines
+
+* Mon Feb 25 2013 Steve Jenkins <steve stevejenkins com> 2.8.0-2
+- Added / in front of unitdir variables
+
 * Thu Feb 21 2013 Steve Jenkins <steve stevejenkins com> 2.8.0-1
 - Happy Birthday to me! :)
 - Updated to use newer upstream 2.8.0 source code
@@ -373,6 +378,7 @@ rm -rf %{buildroot}
 - Moved default key check and generation on startup to external script
 - Removed AutoRestart directives from default config (systemd will handle)
 - Incorporated additional variable names throughout spec file
+- Added support for new opendkim-sysvinit package for legacy SysV systems
 
 * Tue Jan 08 2013 Steve Jenkins <steve stevejenkins com> 2.7.4-1
 - Updated to use newer upstream 2.7.4 source code

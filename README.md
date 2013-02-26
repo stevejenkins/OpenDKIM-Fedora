@@ -3,7 +3,7 @@ OpenDKIM-Fedora
 
 This git repo contains:
 
-- **SPECS/opendkim.spec** - spec file for the OpenDKIM package I maintain in Fedora & EPEL (https://admin.fedoraproject.org/pkgdb/acls/name/opendkim/)
+- **SPECS/opendkim.spec** - systemd-compatible spec file for the OpenDKIM package I maintain in Fedora & EPEL (https://admin.fedoraproject.org/pkgdb/acls/name/opendkim/)
 
 - **PATCHES** - patches for the spec file, as needed, depending on version
 
@@ -13,7 +13,9 @@ This git repo contains:
 
 - **contrib/init/redhat/opendkim-default-keygen.in** - Template file to build the external script that generates default DKIM keys on startup (contributed to OpenDKIM source)
 
-CONTRIBUTORS: Please do pull requests in the "develop" branch only. The "master" branch is just for release versions. Thanks!
+**CONTRIBUTORS:** Please do pull requests in the "develop" branch only. The "master" branch is just for release versions. Thanks!
+
+For the SystemV-compatible version of this repo, visit http://github.com/stevejenkins/OpenDKIM-SysV/
 
 For official source code and documentation, please visit http://opendkim.org/
 
