@@ -24,8 +24,8 @@ BuildRequires: pkgconfig
 BuildRequires: sendmail-devel
 
 Source0: http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
-Source1: %{name}.service
-Source2: %{name}-default-keygen
+#Source1: %{name}.service
+#Source2: %{name}-default-keygen
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -84,9 +84,8 @@ install -d %{buildroot}%{_sysconfdir}/sysconfig
 install -d %{buildroot}%{_initrddir}
 install -d -m 0755 %{buildroot}%{_unitdir}
 install -m 0755 contrib/init/redhat/%{name} %{buildroot}%{_initrddir}/%{name}
-#install -m 0644 contrib/init/systemd/%{name}.service %{buildroot}%{_unitdir}/%{name}.service
-install -m 0644 %{SOURCE1} %{buildroot}%{_unitdir}/%{name}.service
-install -m 0755 %{SOURCE2} %{buildroot}%{_sbindir}/%{name}-default-keygen
+install -m 0644 contrib/systemd/%{name}.service %{buildroot}%{_unitdir}/%{name}.service
+install -m 0755 contrib/init/redhat/%{name}-default-keygen %{buildroot}%{_sbindir}/%{name}-default-keygen
 
 cat > %{buildroot}%{_sysconfdir}/%{name}.conf << 'EOF'
 ## BASIC OPENDKIM CONFIGURATION FILE
