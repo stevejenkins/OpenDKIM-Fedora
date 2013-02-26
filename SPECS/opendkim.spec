@@ -52,20 +52,20 @@ Requires: libopendkim = %{version}-%{release}
 This package contains the static libraries, headers, and other support files
 required for developing applications against libopendkim.
 
-#%package sysvinit
-#Summary: The SysV init script to manage the OpenDKIM milter.
-#Group: System Environmnt/Daemons
-#Requires: %{name} = %{version}-%{release}
+%package sysvinit
+Summary: The SysV init script to manage the OpenDKIM milter.
+Group: System Environmnt/Daemons
+Requires: %{name} = %{version}-%{release}
 
-#%description sysvinit
-#OpenDKIM allows signing and/or verification of email through an open source
-#library that implements the DKIM service, plus a milter-based filter
-#application that can plug in to any milter-aware MTA, including sendmail,
-#Postfix, or any other MTA that supports the milter protocol. This package
-#contains the SysV init script to manage the OpenDKIM milter when running a
-#legacy SysV-compatible init system.
-#
-#It is not required when the init system used is systemd.
+%description sysvinit
+OpenDKIM allows signing and/or verification of email through an open source
+library that implements the DKIM service, plus a milter-based filter
+application that can plug in to any milter-aware MTA, including sendmail,
+Postfix, or any other MTA that supports the milter protocol. This package
+contains the SysV init script to manage the OpenDKIM milter when running a
+legacy SysV-compatible init system.
+
+It is not required when the init system used is systemd.
 
 %prep
 %setup -q
