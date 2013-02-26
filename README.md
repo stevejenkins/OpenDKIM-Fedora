@@ -15,8 +15,6 @@ For the SystemV-compatible version of this repo, visit http://github.com/steveje
 
 For official source code and documentation, please visit http://opendkim.org/
 
-Steve Jenkins
-
 Find/follow/friend me at:
 - http://stevejenkins.com/
 - http://stevej.fedorapeople.org/
