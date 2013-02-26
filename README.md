@@ -9,10 +9,6 @@ This git repo contains:
 
 - **contrib/init/redhat/opendkim.in** - Template file to build the OpenDKIM SysV init script (contributed to OpenDKIM source)
 
-- **contrib/init/redhat/opendkim.service.in** - Template file to build the OpenDKIM systemd service unit file (contributed to OpenDKIM source)
-
-- **contrib/init/redhat/opendkim-default-keygen.in** - Template file to build the external script that generates default DKIM keys on startup (contributed to OpenDKIM source)
-
 **CONTRIBUTORS:** Please do pull requests in the "develop" branch only. The "master" branch is just for release versions. Thanks!
 
 For the SystemV-compatible version of this repo, visit http://github.com/stevejenkins/OpenDKIM-SysV/
