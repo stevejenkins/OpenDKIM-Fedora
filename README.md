@@ -1,5 +1,6 @@
 OpenDKIM-Fedora
 ===============
+Current release version: 2.8.0-4
 
 This git repo contains:
 
