@@ -2,8 +2,8 @@
 
 Summary: A DomainKeys Identified Mail (DKIM) milter to sign and/or verify mail
 Name: opendkim
-Version: 2.8.0
-Release: 4%{?dist}
+Version: 2.8.1
+Release: 1%{?dist}
 License: BSD and Sendmail
 URL: http://opendkim.org/
 Group: System Environment/Daemons
@@ -27,7 +27,7 @@ BuildRequires: sendmail-devel
 
 Source0: http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
 
-Patch0: %{name}-libdb.patch
+#Patch0: %{name}-libdb.patch
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -71,7 +71,7 @@ It is not required when the init system used is systemd.
 
 %prep
 %setup -q
-%patch0 -p1
+#%patch0 -p1
 
 %build
 %configure
@@ -360,6 +360,10 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
+* Tue Mar 19 2013 Steve Jenkins <steve stevejenkins com> 2.8.1-1
+- Updated to use newer upstream 2.8.1 source code
+- Removed patches for bugs fixed in upstream source
+
 * Wed Feb 27 2013 Steve Jenkins <steve stevejenkins com> 2.8.0-4
 - Added patch from upstream to fix libdb compatibility issues
 
