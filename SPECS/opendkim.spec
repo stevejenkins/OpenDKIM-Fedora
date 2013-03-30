@@ -2,7 +2,7 @@
 
 Summary: A DomainKeys Identified Mail (DKIM) milter to sign and/or verify mail
 Name: opendkim
-Version: 2.8.1
+Version: 2.8.2
 Release: 1%{?dist}
 License: BSD and Sendmail
 URL: http://opendkim.org/
@@ -360,6 +360,9 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
+* Fri Mar 29 2013 Steve Jenkins <steve stevejenkins com> 2.8.2-1
+- Updated to use newer upstream 2.8.2 source code
+
 * Tue Mar 19 2013 Steve Jenkins <steve stevejenkins com> 2.8.1-1
 - Updated to use newer upstream 2.8.1 source code
 - Removed patches for bugs fixed in upstream source
