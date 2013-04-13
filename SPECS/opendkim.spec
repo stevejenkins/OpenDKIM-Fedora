@@ -3,7 +3,7 @@
 Summary: A DomainKeys Identified Mail (DKIM) milter to sign and/or verify mail
 Name: opendkim
 Version: 2.8.2
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: BSD and Sendmail
 URL: http://opendkim.org/
 Group: System Environment/Daemons
@@ -74,7 +74,8 @@ It is not required when the init system used is systemd.
 #%patch0 -p1
 
 %build
-%configure
+#%configure --with-unbound --with-libmemcached --with-db --enable-stats
+%configure --with-unbound --with-libmemcached --with-db
 sed -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
 sed -i 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' libtool
 
@@ -360,6 +361,9 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
+* Fri Apr 13 2013 Steve Jenkins <steve stevejenkins com> 2.8.2-2
+- Added unbound, libmemcached, and db support on configure
+
 * Fri Mar 29 2013 Steve Jenkins <steve stevejenkins com> 2.8.2-1
 - Updated to use newer upstream 2.8.2 source code
 
