@@ -2,7 +2,7 @@
 
 Summary: A DomainKeys Identified Mail (DKIM) milter to sign and/or verify mail
 Name: opendkim
-Version: 2.8.2
+Version: 2.8.3
 Release: 1%{?dist}
 License: BSD and Sendmail
 URL: http://opendkim.org/
@@ -24,6 +24,9 @@ Requires (post): systemd-sysv
 BuildRequires: openssl-devel
 BuildRequires: pkgconfig
 BuildRequires: sendmail-devel
+BuildRequires: unbound-devel
+BuildRequires: libmemcached-devel
+BuildRequires: libdb-devel
 
 Source0: http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
 
@@ -74,7 +77,8 @@ It is not required when the init system used is systemd.
 #%patch0 -p1
 
 %build
-%configure
+#%configure --with-unbound --with-libmemcached --with-db --enable-stats
+%configure --with-unbound --with-libmemcached --with-db
 sed -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
 sed -i 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' libtool
 
@@ -360,7 +364,11 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
-* Fri Mar 29 2013 Steve Jenkins <steve stevejenkins com> 2.8.2-1
+* Sun May 12 2013 Steve Jenkins <steve stevejenkins com> 2.8.3-1
+- Updated to use newer upstream 2.8.3 source code
+- Added unbound, memcached, and db support on configure
+
+* Fri Apr 29 2013 Steve Jenkins <steve stevejenkins com> 2.8.2-1
 - Updated to use newer upstream 2.8.2 source code
 
 * Tue Mar 19 2013 Steve Jenkins <steve stevejenkins com> 2.8.1-1
