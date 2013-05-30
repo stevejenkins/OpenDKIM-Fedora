@@ -3,7 +3,7 @@
 Summary: A DomainKeys Identified Mail (DKIM) milter to sign and/or verify mail
 Name: opendkim
 Version: 2.8.3
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: BSD and Sendmail
 URL: http://opendkim.org/
 Group: System Environment/Daemons
@@ -15,18 +15,19 @@ Requires (post): systemd-units
 Requires (preun): systemd-units
 Requires (postun): systemd-units
 Requires (post): systemd-sysv
+BuildRequires: libdb-devel
+BuildRequires: libmemcached-devel
 
 # Uncomment for SystemV version
 #Requires (post): chkconfig
 #Requires (preun): chkconfig, initscripts
 #Requires (postun): initscripts
+#BuildRequires: db4-devel
 
-BuildRequires: openssl-devel
 BuildRequires: pkgconfig
+BuildRequires: openssl-devel
 BuildRequires: sendmail-devel
 BuildRequires: unbound-devel
-BuildRequires: libmemcached-devel
-BuildRequires: libdb-devel
 
 Source0: http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
 
@@ -77,7 +78,6 @@ It is not required when the init system used is systemd.
 #%patch0 -p1
 
 %build
-#%configure --with-unbound --with-libmemcached --with-db --enable-stats
 %configure --with-unbound --with-libmemcached --with-db
 sed -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
 sed -i 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' libtool
@@ -364,9 +364,12 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
+* Fri May 17 2013 Steve Jenkins <steve stevejenkins com> 2.8.3-2
+- Removed libmemcached support from SysV version (requires > v0.36)
+
 * Sun May 12 2013 Steve Jenkins <steve stevejenkins com> 2.8.3-1
 - Updated to use newer upstream 2.8.3 source code
-- Added unbound, memcached, and db support on configure
+- Added unbound, libmcached, and db support on configure
 
 * Fri Apr 29 2013 Steve Jenkins <steve stevejenkins com> 2.8.2-1
 - Updated to use newer upstream 2.8.2 source code
