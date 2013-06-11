@@ -17,6 +17,7 @@ Requires (postun): systemd-units
 Requires (post): systemd-sysv
 BuildRequires: libdb-devel
 BuildRequires: libmemcached-devel
+BuildRequires: libbsd
 
 # Uncomment for SystemV version
 #Requires (post): chkconfig
@@ -351,8 +352,8 @@ rm -rf %{buildroot}
 %defattr(-,root,root)
 %doc LICENSE LICENSE.Sendmail README
 %{_libdir}/libopendkim.so.*
-%{_libdir}/libstrl.so.*
-%{_includedir}/strl/strl.h
+#%{_libdir}/libstrl.so.*
+#%{_includedir}/strl/strl.h
 
 
 %files -n libopendkim-devel
@@ -364,8 +365,10 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
-* Thu May 30 2013 Steve Jenkins <steve stevejenkins com> 2.8.4-1
+* Mon Jun 10 2013 Steve Jenkins <steve stevejenkins com> 2.8.4-1
 - Updated to use newer upstream 2.8.4 source code
+- Added libbsd build requirement (systemd only)
+- Commented out libstrl.so* and strl.h references (systemd only)
 
 * Fri May 17 2013 Steve Jenkins <steve stevejenkins com> 2.8.3-2
 - Removed libmemcached support from SysV version (requires > v0.36)
