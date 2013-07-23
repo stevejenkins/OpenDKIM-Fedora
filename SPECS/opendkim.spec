@@ -352,8 +352,8 @@ rm -rf %{buildroot}
 %defattr(-,root,root)
 %doc LICENSE LICENSE.Sendmail README
 %{_libdir}/libopendkim.so.*
-#%{_libdir}/libstrl.so.*
-#%{_includedir}/strl/strl.h
+%{_libdir}/libstrl.so.*
+%{_includedir}/strl/strl.h
 
 
 %files -n libopendkim-devel
@@ -365,10 +365,13 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
-* Mon Jun 10 2013 Steve Jenkins <steve stevejenkins com> 2.8.4-1
+* Mon Jul 23 2013 Steve Jenkins <steve stevejenkins com> 2.8.4-1
 - Updated to use newer upstream 2.8.4 source code
 - Added libbsd build requirement (systemd only)
 - Commented out libstrl.so* and strl.h references (systemd only)
+
+* Thu Jul 18 2013 Petr Pisar <ppisar@redhat.com> - 2.8.3-3
+- Perl 5.18 rebuild
 
 * Fri May 17 2013 Steve Jenkins <steve stevejenkins com> 2.8.3-2
 - Removed libmemcached support from SysV version (requires > v0.36)
