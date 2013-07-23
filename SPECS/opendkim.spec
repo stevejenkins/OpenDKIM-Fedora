@@ -17,7 +17,6 @@ Requires (postun): systemd-units
 Requires (post): systemd-sysv
 BuildRequires: libdb-devel
 BuildRequires: libmemcached-devel
-BuildRequires: libbsd
 
 # Uncomment for SystemV version
 #Requires (post): chkconfig
@@ -25,6 +24,7 @@ BuildRequires: libbsd
 #Requires (postun): initscripts
 #BuildRequires: db4-devel
 
+BuildRequires: libbsd
 BuildRequires: pkgconfig
 BuildRequires: openssl-devel
 BuildRequires: sendmail-devel
@@ -365,10 +365,9 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
-* Mon Jul 23 2013 Steve Jenkins <steve stevejenkins com> 2.8.4-1
+* Tue Jul 23 2013 Steve Jenkins <steve stevejenkins com> 2.8.4-1
 - Updated to use newer upstream 2.8.4 source code
-- Added libbsd build requirement (systemd only)
-- Commented out libstrl.so* and strl.h references (systemd only)
+- Added libbsd build requirement
 
 * Thu Jul 18 2013 Petr Pisar <ppisar@redhat.com> - 2.8.3-3
 - Perl 5.18 rebuild
