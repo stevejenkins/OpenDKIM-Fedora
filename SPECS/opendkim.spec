@@ -2,8 +2,8 @@
 
 Summary: A DomainKeys Identified Mail (DKIM) milter to sign and/or verify mail
 Name: opendkim
-Version: 2.8.3
-Release: 2%{?dist}
+Version: 2.8.4
+Release: 1%{?dist}
 License: BSD and Sendmail
 URL: http://opendkim.org/
 Group: System Environment/Daemons
@@ -24,6 +24,7 @@ BuildRequires: libmemcached-devel
 #Requires (postun): initscripts
 #BuildRequires: db4-devel
 
+BuildRequires: libbsd
 BuildRequires: pkgconfig
 BuildRequires: openssl-devel
 BuildRequires: sendmail-devel
@@ -364,6 +365,13 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
+* Tue Jul 23 2013 Steve Jenkins <steve stevejenkins com> 2.8.4-1
+- Updated to use newer upstream 2.8.4 source code
+- Added libbsd build requirement
+
+* Thu Jul 18 2013 Petr Pisar <ppisar@redhat.com> - 2.8.3-3
+- Perl 5.18 rebuild
+
 * Fri May 17 2013 Steve Jenkins <steve stevejenkins com> 2.8.3-2
 - Removed libmemcached support from SysV version (requires > v0.36)
 
