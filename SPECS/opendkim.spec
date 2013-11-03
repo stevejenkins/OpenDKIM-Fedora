@@ -1,9 +1,11 @@
 # systemd-compatible version
 
+%{!?_pkgdocdir: %global _pkgdocdir %{_docdir}/%{name}-%{version}}
+
 Summary: A DomainKeys Identified Mail (DKIM) milter to sign and/or verify mail
 Name: opendkim
 Version: 2.8.4
-Release: 1%{?dist}
+Release: 3%{?dist}
 License: BSD and Sendmail
 URL: http://opendkim.org/
 Group: System Environment/Daemons
@@ -97,7 +99,7 @@ install -m 0755 contrib/init/redhat/%{name}-default-keygen %{buildroot}%{_sbindi
 
 cat > %{buildroot}%{_sysconfdir}/%{name}.conf << 'EOF'
 ## BASIC OPENDKIM CONFIGURATION FILE
-## See %{name}.conf(5) or %{_docdir}/%{name}-%{version}/%{name}.conf.sample for more
+## See %{name}.conf(5) or %{_pkgdocdir}/%{name}.conf.sample for more
 
 ## BEFORE running OpenDKIM you must:
 
@@ -105,7 +107,7 @@ cat > %{buildroot}%{_sysconfdir}/%{name}.conf << 'EOF'
 ## - generate keys for your domain (if signing)
 ## - edit your DNS records to publish your public keys (if signing)
 
-## See %{_docdir}/%{name}-%{version}/INSTALL for detailed instructions.
+## See %{_pkgdocdir}/INSTALL for detailed instructions.
 
 ## CONFIGURATION OPTIONS
 
@@ -365,6 +367,12 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
+* Sun Nov  3 2013 Ville Skyttä <ville.skytta@iki.fi> - 2.8.4-3
+- Fix path to docs in sample config when doc dir is unversioned (#993997).
+
+* Sat Aug 03 2013 Petr Pisar <ppisar@redhat.com> - 2.8.4-2
+- Perl 5.18 rebuild
+
 * Tue Jul 23 2013 Steve Jenkins <steve stevejenkins com> 2.8.4-1
 - Updated to use newer upstream 2.8.4 source code
 - Added libbsd build requirement
