@@ -4,8 +4,8 @@
 
 Summary: A DomainKeys Identified Mail (DKIM) milter to sign and/or verify mail
 Name: opendkim
-Version: 2.8.4
-Release: 3%{?dist}
+Version: 2.9.0
+Release: 1%{?dist}
 License: BSD and Sendmail
 URL: http://opendkim.org/
 Group: System Environment/Daemons
@@ -27,6 +27,7 @@ BuildRequires: libmemcached-devel
 #BuildRequires: db4-devel
 
 BuildRequires: libbsd
+BuildRequires: libbsd-devel
 BuildRequires: pkgconfig
 BuildRequires: openssl-devel
 BuildRequires: sendmail-devel
@@ -354,9 +355,6 @@ rm -rf %{buildroot}
 %defattr(-,root,root)
 %doc LICENSE LICENSE.Sendmail README
 %{_libdir}/libopendkim.so.*
-%{_libdir}/libstrl.so.*
-%{_includedir}/strl/strl.h
-
 
 %files -n libopendkim-devel
 %defattr(-,root,root)
@@ -367,7 +365,15 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
-* Sun Nov  3 2013 Ville Skyttä <ville.skytta@iki.fi> - 2.8.4-3
+* Wed Dec 18 2013 Steve Jenkins <steve stevejenkins com> - 2.9.0-1
+- Update to use newer upstream 2.9.0 source code
+- Added libbsd-devel to BuildRequires
+- Removed listrl references from libopendkim files section (handled by libbsd-devel)
+
+* Sun Nov 3 2013 Steve Jenkins <steve stevejenkins com> - 2.8.4-4
+- Rebuild of all release packages to sync version numbers
+
+* Sun Nov 3 2013 Ville Skytta ville.skytta@iki.fi> - 2.8.4-3
 - Fix path to docs in sample config when doc dir is unversioned (#993997).
 
 * Sat Aug 03 2013 Petr Pisar <ppisar@redhat.com> - 2.8.4-2
