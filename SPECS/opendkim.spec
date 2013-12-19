@@ -5,7 +5,7 @@
 Summary: A DomainKeys Identified Mail (DKIM) milter to sign and/or verify mail
 Name: opendkim
 Version: 2.9.0
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: BSD and Sendmail
 URL: http://opendkim.org/
 Group: System Environment/Daemons
@@ -35,7 +35,9 @@ BuildRequires: unbound-devel
 
 Source0: http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
 
-#Patch0: %{name}-libdb.patch
+# Add User/Group to systemd service file
+# https://sourceforge.net/p/opendkim/bugs/184/
+Patch0: %{name}.add-user-group.patch
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -79,7 +81,7 @@ It is not required when the init system used is systemd.
 
 %prep
 %setup -q
-#%patch0 -p1
+%patch0 -p1
 
 %build
 %configure --with-unbound --with-libmemcached --with-db
@@ -343,7 +345,7 @@ rm -rf %{buildroot}
 %dir %attr(-,%{name},%{name}) %{_localstatedir}/spool/%{name}
 %dir %attr(-,%{name},%{name}) %{_localstatedir}/run/%{name}
 %dir %attr(-,root,%{name}) %{_sysconfdir}/%{name}
-%dir %attr(750,root,%{name}) %{_sysconfdir}/%{name}/keys
+%dir %attr(750,%name,%{name}) %{_sysconfdir}/%{name}/keys
 %attr(0644,root,root) %{_unitdir}/%{name}.service
 %attr(0755,root,root) %{_sbindir}/%{name}-default-keygen
 
@@ -365,9 +367,13 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
+* Wed Dec 18 2013 Steve Jenkins <steve stevejenkins com> - 2.9.0-2
+- Patch adds user and group to systemd service file (Thx jcosta@redhat.com)
+- Changed default ownership of /etc/opendkim/keys directory to opendkim user
+
 * Wed Dec 18 2013 Steve Jenkins <steve stevejenkins com> - 2.9.0-1
-- Update to use newer upstream 2.9.0 source code
-- Added libbsd-devel to BuildRequires
+- Updated to use newer upstream 2.9.0 source code
+- Added libbsd-devel to Build Requires
 - Removed listrl references from libopendkim files section (handled by libbsd-devel)
 
 * Sun Nov 3 2013 Steve Jenkins <steve stevejenkins com> - 2.8.4-4
