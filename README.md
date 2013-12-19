@@ -1,6 +1,6 @@
 OpenDKIM-Fedora
 ===============
-Current release version: 2.8.3-2
+Current release version: 2.9.0-2
 
 This git repo contains:
 
@@ -9,6 +9,8 @@ This git repo contains:
 - **PATCHES** - patches for the spec file, as needed, depending on version
 
 - **contrib/init/redhat/opendkim.in** - Template file to build the OpenDKIM SysV init script (contributed to OpenDKIM source)
+
+- **contrib/init/systemd/opendkim.service.in** - Template file to build the systemd service file (contributed to OpenDKIM source)
 
 **CONTRIBUTORS:** Please do pull requests in the "develop" branch only. The "master" branch is just for release versions. Thanks!
 
