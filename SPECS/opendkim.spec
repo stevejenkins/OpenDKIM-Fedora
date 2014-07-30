@@ -4,8 +4,8 @@
 
 Summary: A DomainKeys Identified Mail (DKIM) milter to sign and/or verify mail
 Name: opendkim
-Version: 2.9.0
-Release: 2%{?dist}
+Version: 2.9.2
+Release: 1%{?dist}
 License: BSD and Sendmail
 URL: http://opendkim.org/
 Group: System Environment/Daemons
@@ -37,7 +37,7 @@ Source0: http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
 
 # Add User/Group to systemd service file
 # https://sourceforge.net/p/opendkim/bugs/184/
-Patch0: %{name}.add-user-group.patch
+# Patch0: %{name}.add-user-group.patch
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
