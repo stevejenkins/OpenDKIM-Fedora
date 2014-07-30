@@ -29,7 +29,7 @@ do_dkim_keygen() {
                         $KEYGEN -D $DKIM_KEYDIR -s $DKIM_SELECTOR -d `hostname --domain`
                         chown root:$prog $DKIM_KEYDIR
                         chown $prog:$prog $DKIM_KEYDIR/$DKIM_SELECTOR.{private,txt}
-                        chmod 600 $DKIM_KEYDIR/$DKIM_SELECTOR.private
+                        chmod 640 $DKIM_KEYDIR/$DKIM_SELECTOR.private
                         chmod 644 $DKIM_KEYDIR/$DKIM_SELECTOR.txt
 #                       echo_success
                         echo
