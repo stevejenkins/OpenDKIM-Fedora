@@ -1,0 +1,13 @@
+--- opendkim-2.9.2/contrib/init/redhat/opendkim-default-keygen.in.orig	2014-07-31 07:39:00.294182472 -0700
++++ opendkim-2.9.2/contrib/init/redhat/opendkim-default-keygen.in	2014-07-31 10:51:03.972438030 -0700
+@@ -28,8 +28,8 @@
+                         mkdir -p $DKIM_KEYDIR
+                         $KEYGEN -D $DKIM_KEYDIR -s $DKIM_SELECTOR -d `hostname --domain`
+                         chown root:$prog $DKIM_KEYDIR
+-                        chown $prog:$prog $DKIM_KEYDIR/$DKIM_SELECTOR.{private,txt}
+-                        chmod 600 $DKIM_KEYDIR/$DKIM_SELECTOR.private
++                        chown root:$prog $DKIM_KEYDIR/$DKIM_SELECTOR.{private,txt}
++                        chmod 640 $DKIM_KEYDIR/$DKIM_SELECTOR.private
+                         chmod 644 $DKIM_KEYDIR/$DKIM_SELECTOR.txt
+ #                       echo_success
+                         echo
