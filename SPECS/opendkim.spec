@@ -5,7 +5,7 @@
 Summary: A DomainKeys Identified Mail (DKIM) milter to sign and/or verify mail
 Name: opendkim
 Version: 2.9.2
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: BSD and Sendmail
 URL: http://opendkim.org/
 Group: System Environment/Daemons
@@ -35,9 +35,9 @@ BuildRequires: unbound-devel
 
 Source0: http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
 
-# Add User/Group to systemd service file
-# https://sourceforge.net/p/opendkim/bugs/184/
-# Patch0: %{name}.add-user-group.patch
+Patch0: %{name}.keygen-permissions.patch
+Patch1: %{name}.autocreate-keys-no.patch
+Patch2: %{name}.systemd-no-default-genkey.patch
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -82,6 +82,8 @@ It is not required when the init system used is systemd.
 %prep
 %setup -q
 %patch0 -p1
+%patch1 -p1
+%patch2 -p1
 
 %build
 %configure --with-unbound --with-libmemcached --with-db
@@ -189,8 +191,8 @@ cat > %{buildroot}%{_sysconfdir}/sysconfig/%{name} << 'EOF'
 # Set the necessary startup options
 OPTIONS="-x %{_sysconfdir}/%{name}.conf -P %{_localstatedir}/run/%{name}/%{name}.pid"
 
-# Determine whether default DKIM keys are automatically created on start
-AUTOCREATE_DKIM_KEYS=YES
+# Determine whether default DKIM keys are automatically created on start (deprecated)
+# AUTOCREATE_DKIM_KEYS=YES
 
 # Set the default DKIM selector
 DKIM_SELECTOR=default
@@ -336,16 +338,16 @@ rm -rf %{buildroot}
 %doc contrib/stats/README.%{name}-reportstats
 %config(noreplace) %{_sysconfdir}/%{name}.conf
 %config(noreplace) %{_sysconfdir}/tmpfiles.d/%{name}.conf
-%config(noreplace) %attr(640,%{name},%{name}) %{_sysconfdir}/%{name}/SigningTable
-%config(noreplace) %attr(640,%{name},%{name}) %{_sysconfdir}/%{name}/KeyTable
-%config(noreplace) %attr(640,%{name},%{name}) %{_sysconfdir}/%{name}/TrustedHosts
+%config(noreplace) %attr(640,root,%{name}) %{_sysconfdir}/%{name}/SigningTable
+%config(noreplace) %attr(640,root,%{name}) %{_sysconfdir}/%{name}/KeyTable
+%config(noreplace) %attr(640,root,%{name}) %{_sysconfdir}/%{name}/TrustedHosts
 %config(noreplace) %{_sysconfdir}/sysconfig/%{name}
 %{_sbindir}/*
 %{_mandir}/*/*
 %dir %attr(-,%{name},%{name}) %{_localstatedir}/spool/%{name}
 %dir %attr(-,%{name},%{name}) %{_localstatedir}/run/%{name}
 %dir %attr(-,root,%{name}) %{_sysconfdir}/%{name}
-%dir %attr(750,%name,%{name}) %{_sysconfdir}/%{name}/keys
+%dir %attr(750,root,%{name}) %{_sysconfdir}/%{name}/keys
 %attr(0644,root,root) %{_unitdir}/%{name}.service
 %attr(0755,root,root) %{_sbindir}/%{name}-default-keygen
 
@@ -367,6 +369,17 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
+* Mon Aug 4 2014 Steve Jenkins <steve@stevejenkins.com> - 2.9.2-2
+- Change file ownerships/permissions to fix https://bugzilla.redhat.com/show_bug.cgi?id=891292
+- Default keys no longer created on startup. Privileged user must run opendkim-default-keygen or create manually (after install)
+
+* Wed Jul 30 2014 Steve Jenkins <steve@stevejenkins.com> - 2.9.2-1
+- Updated to use newer upstream 2.9.2 source code
+- Fixed invalid date in changelog
+
+* Sat Jun 07 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2.9.0-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_21_Mass_Rebuild
+
 * Wed Dec 18 2013 Steve Jenkins <steve stevejenkins com> - 2.9.0-2
 - Patch adds user and group to systemd service file (Thx jcosta@redhat.com)
 - Changed default ownership of /etc/opendkim/keys directory to opendkim user
@@ -399,7 +412,7 @@ rm -rf %{buildroot}
 - Updated to use newer upstream 2.8.3 source code
 - Added unbound, libmcached, and db support on configure
 
-* Fri Apr 29 2013 Steve Jenkins <steve stevejenkins com> 2.8.2-1
+* Mon Apr 29 2013 Steve Jenkins <steve stevejenkins com> 2.8.2-1
 - Updated to use newer upstream 2.8.2 source code
 
 * Tue Mar 19 2013 Steve Jenkins <steve stevejenkins com> 2.8.1-1
