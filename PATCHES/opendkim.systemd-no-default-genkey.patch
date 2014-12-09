@@ -1,0 +1,10 @@
+--- opendkim-2.9.2/contrib/systemd/opendkim.service.in.orig	2014-08-04 13:20:38.509231188 -0700
++++ opendkim-2.9.2/contrib/systemd/opendkim.service.in	2014-08-04 13:21:36.730470075 -0700
+@@ -7,7 +7,6 @@
+ Type=forking
+ PIDFile=@localstatedir@/run/opendkim/opendkim.pid
+ EnvironmentFile=-@sysconfdir@/sysconfig/opendkim
+-ExecStartPre=@sbindir@/opendkim-default-keygen
+ ExecStart=@sbindir@/opendkim $OPTIONS
+ ExecReload=/bin/kill -USR1 $MAINPID
+ User=opendkim
