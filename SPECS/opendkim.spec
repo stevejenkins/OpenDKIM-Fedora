@@ -5,7 +5,7 @@
 Summary: A DomainKeys Identified Mail (DKIM) milter to sign and/or verify mail
 Name: opendkim
 Version: 2.10.1
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: BSD and Sendmail
 URL: http://opendkim.org/
 Group: System Environment/Daemons
@@ -239,6 +239,7 @@ cat > %{buildroot}%{_sysconfdir}/%{name}/TrustedHosts << 'EOF'
 # may be added on separate lines (IP addresses, hostnames, or CIDR ranges).
 # The localhost IP (127.0.0.1) should always be the first entry in this file.
 127.0.0.1
+::1
 #host.example.com
 #192.168.1.0/24
 EOF
@@ -441,6 +442,9 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
+* Tue Mar 03 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-2
+- Added IPv6 ::1 support to TrustedHosts (RH Bugzilla #1049204)
+
 * Tue Mar 03 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-1
 - Updated to use newer upstream 2.10.1 source code
 
