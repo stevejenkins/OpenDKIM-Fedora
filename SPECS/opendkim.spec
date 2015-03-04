@@ -18,6 +18,7 @@ Requires (preun): systemd-units
 Requires (postun): systemd-units
 Requires (post): systemd-sysv
 BuildRequires: libdb-devel
+BuildRequires: libmemcached-devel
 
 # Uncomment for SystemV version
 #Requires (post): chkconfig
@@ -26,7 +27,6 @@ BuildRequires: libdb-devel
 #BuildRequires: db4-devel
 
 # Required for all versions
-BuildRequires: libmemcached-devel
 BuildRequires: libbsd
 BuildRequires: libbsd-devel
 BuildRequires: pkgconfig
