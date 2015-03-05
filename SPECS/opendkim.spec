@@ -5,7 +5,7 @@
 Summary: A DomainKeys Identified Mail (DKIM) milter to sign and/or verify mail
 Name: opendkim
 Version: 2.10.1
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: BSD and Sendmail
 URL: http://opendkim.org/
 Group: System Environment/Daemons
@@ -64,7 +64,7 @@ required for developing applications against libopendkim.
 
 %package sysvinit
 Summary: The SysV init script to manage the OpenDKIM milter.
-Group: System Environmnt/Daemons
+Group: System Environment/Daemons
 Requires: %{name} = %{version}-%{release}
 
 %description sysvinit
@@ -442,6 +442,9 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
+* Thu Mar 05 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-3
+- Fixed typo in Group name for sysvinit package
+
 * Tue Mar 03 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-2
 - Added IPv6 ::1 support to TrustedHosts (RH Bugzilla #1049204)
 
