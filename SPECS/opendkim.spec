@@ -84,7 +84,13 @@ It is not required when the init system used is systemd.
 #%patch0 -p1
 
 %build
+# Always use system libtool instead of opendkim provided one to
+# properly handle 32 versus 64 bit detection and settings
+%define LIBTOOL LIBTOOL=`which libtool`
+
 %configure --with-libmemcached --with-db
+
+# Remove rpath
 sed -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
 sed -i 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' libtool
 
@@ -450,8 +456,10 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
-* Thu Mar 05 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-4
+* Fri Mar 06 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-4
 - Fixed typo in Group name
+- Added updated libtool definition
+- Additional comments in spec file
 
 * Thu Mar 05 2015 Adam Jackson <ajax@redhat.com> 2.10.1-3
 - Drop sysvinit subpackage from F23+
