@@ -1,4 +1,4 @@
-# systemd-compatible version
+%global is_systemd (0%{?fedora} && %{?fedora} >= 18) || (0%{?rhel} && %{?rhel} >= 7)
 
 %{!?_pkgdocdir: %global _pkgdocdir %{_docdir}/%{name}-%{version}}
 
@@ -12,21 +12,21 @@ Group: System Environment/Daemons
 Requires: lib%{name} = %{version}-%{release}
 Requires (pre): shadow-utils
 
-# Uncomment for systemd version
+%if is_systemd
 Requires (post): systemd-units
 Requires (preun): systemd-units
 Requires (postun): systemd-units
 Requires (post): systemd-sysv
 BuildRequires: libdb-devel
 BuildRequires: libmemcached-devel
+%else
+Requires (post): chkconfig
+Requires (preun): chkconfig, initscripts
+Requires (postun): initscripts
+BuildRequires: db4-devel
+%endif
 
-# Uncomment for SystemV version
-#Requires (post): chkconfig
-#Requires (preun): chkconfig, initscripts
-#Requires (postun): initscripts
-#BuildRequires: db4-devel
-
-# Required for all versions
+# Required for all systems
 BuildRequires: libbsd
 BuildRequires: libbsd-devel
 BuildRequires: pkgconfig
@@ -35,7 +35,7 @@ BuildRequires: sendmail-devel
 
 Source0: http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
 
-# Patch0: %{name}.patchname.patch
+Patch0: %{name}.init.patch
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -62,33 +62,20 @@ Requires: libopendkim = %{version}-%{release}
 This package contains the static libraries, headers, and other support files
 required for developing applications against libopendkim.
 
-%if 0%{?fedora} < 23
-%package sysvinit
-Summary: The SysV init script to manage the OpenDKIM milter.
-Group: System Environment/Daemons
-Requires: %{name} = %{version}-%{release}
-
-%description sysvinit
-OpenDKIM allows signing and/or verification of email through an open source
-library that implements the DKIM service, plus a milter-based filter
-application that can plug in to any milter-aware MTA, including sendmail,
-Postfix, or any other MTA that supports the milter protocol. This package
-contains the SysV init script to manage the OpenDKIM milter when running a
-legacy SysV-compatible init system.
-
-It is not required when the init system used is systemd.
-%endif
-
 %prep
 %setup -q
-#%patch0 -p1
+%patch0 -p1
 
 %build
 # Always use system libtool instead of opendkim provided one to
 # properly handle 32 versus 64 bit detection and settings
 %define LIBTOOL LIBTOOL=`which libtool`
 
+%if is_systemd
 %configure --with-libmemcached --with-db
+%else
+%configure --with-db
+%endif
 
 # Remove rpath
 sed -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
@@ -100,10 +87,14 @@ rm -rf %{buildroot}
 make DESTDIR=%{buildroot} install %{?_smp_mflags}
 install -d %{buildroot}%{_sysconfdir}
 install -d %{buildroot}%{_sysconfdir}/sysconfig
+install -m 0755 contrib/init/redhat/%{name}-default-keygen %{buildroot}%{_sbindir}/%{name}-default-keygen
+
+%if is_systemd
 install -d -m 0755 %{buildroot}%{_unitdir}
 install -m 0644 contrib/systemd/%{name}.service %{buildroot}%{_unitdir}/%{name}.service
-install -m 0755 contrib/init/redhat/%{name}-default-keygen %{buildroot}%{_sbindir}/%{name}-default-keygen
-%if 0%{?fedora} < 23
+
+%else
+
 install -d %{buildroot}%{_initrddir}
 install -m 0755 contrib/init/redhat/%{name} %{buildroot}%{_initrddir}/%{name}
 %endif
@@ -362,49 +353,55 @@ getent passwd %{name} >/dev/null || \
 exit 0
 
 %post
+%if is_systemd
 if [ $1 -eq 1 ] ; then 
     # Initial installation 
     /bin/systemctl enable %{name}.service >/dev/null 2>&1 || :
 fi
 
+%else
+
+/sbin/chkconfig --add %{name} || :
+%endif
+
 %preun
+%if is_systemd
 if [ $1 -eq 0 ] ; then
     # Package removal, not upgrade
     /bin/systemctl --no-reload disable %{name}.service > /dev/null 2>&1 || :
     /bin/systemctl stop %{name}.service > /dev/null 2>&1 || :
 fi
 
+%else
+
+if [ $1 -eq 0 ]; then
+	service %{name} stop >/dev/null || :
+	/sbin/chkconfig --del %{name} || :
+fi
+exit 0
+%endif
+
 %postun
+%if is_systemd
 /bin/systemctl daemon-reload >/dev/null 2>&1 || :
 if [ $1 -ge 1 ] ; then
     # Package upgrade, not uninstall
     /bin/systemctl try-restart %{name}.service >/dev/null 2>&1 || :
 fi
 
-%triggerun -- %{name} < 2.8.0-1
-/bin/systemctl enable %{name}.service >/dev/null 2>&1
-/sbin/chkconfig --del %{name} >/dev/null 2>&1 || :
-/bin/systemctl try-restart %{name}.service >/dev/null 2>&1 || :
+%else
 
-%if 0%{?fedora} < 23
-%post sysvinit
-/sbin/chkconfig --add %{name} || :
-
-%preun sysvinit
-if [ $1 -eq 0 ]; then
-	service %{name} stop >/dev/null || :
-	/sbin/chkconfig --del %{name} || :
-fi
-exit 0
-
-%postun sysvinit
 if [ "$1" -ge "1" ] ; then
 	/sbin/service %{name} condrestart >/dev/null 2>&1 || :
 fi
 exit 0
+%endif
 
-%triggerpostun -n opendkim-sysvinit -- %{name} < 2.8.0-1
-/sbin/chkconfig --add %{name} >/dev/null 2>&1 || :
+%if is_systemd
+%triggerun -- %{name} < 2.8.0-1
+/bin/systemctl enable %{name}.service >/dev/null 2>&1
+/sbin/chkconfig --del %{name} >/dev/null 2>&1 || :
+/bin/systemctl try-restart %{name}.service >/dev/null 2>&1 || :
 %endif
 
 %post -n libopendkim -p /sbin/ldconfig
@@ -433,12 +430,11 @@ rm -rf %{buildroot}
 %dir %attr(-,%{name},%{name}) %{_localstatedir}/run/%{name}
 %dir %attr(-,root,%{name}) %{_sysconfdir}/%{name}
 %dir %attr(750,%name,%{name}) %{_sysconfdir}/%{name}/keys
-%attr(0644,root,root) %{_unitdir}/%{name}.service
 %attr(0755,root,root) %{_sbindir}/%{name}-default-keygen
 
-%if 0%{?fedora} < 23
-%files sysvinit
-%defattr(-,root,root)
+%if is_systemd
+%attr(0644,root,root) %{_unitdir}/%{name}.service
+%else
 %attr(0755,root,root) %{_initrddir}/%{name}
 %endif
 
@@ -456,6 +452,10 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
+* Wed Mar 25 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-5
+- Combined systemd and SysV spec files using conditionals
+- Drop sysvinit subpackage completely
+
 * Tue Mar 24 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-4
 - Fixed typo in Group name
 - Added updated libtool definition
