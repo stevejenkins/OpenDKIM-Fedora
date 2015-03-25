@@ -1,4 +1,4 @@
-%global is_systemd (0%{?fedora} && %{?fedora} >= 18) || (0%{?rhel} && %{?rhel} >= 7)
+%global is_systemd (0%{?fedora} && 0%{?fedora} >= 18) || (0%{?rhel} && 0%{?rhel} >= 7)
 
 %{!?_pkgdocdir: %global _pkgdocdir %{_docdir}/%{name}-%{version}}
 
@@ -66,6 +66,12 @@ required for developing applications against libopendkim.
 %setup -q
 %patch0 -p1
 
+%if is_systemd
+echo "systemd YES!"
+%else
+echo "systemd NO!"
+%endif
+
 %build
 # Always use system libtool instead of opendkim provided one to
 # properly handle 32 versus 64 bit detection and settings
@@ -92,9 +98,7 @@ install -m 0755 contrib/init/redhat/%{name}-default-keygen %{buildroot}%{_sbindi
 %if is_systemd
 install -d -m 0755 %{buildroot}%{_unitdir}
 install -m 0644 contrib/systemd/%{name}.service %{buildroot}%{_unitdir}/%{name}.service
-
 %else
-
 install -d %{buildroot}%{_initrddir}
 install -m 0755 contrib/init/redhat/%{name} %{buildroot}%{_initrddir}/%{name}
 %endif
