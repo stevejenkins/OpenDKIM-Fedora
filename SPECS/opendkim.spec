@@ -1,4 +1,4 @@
-%global is_systemd (0%{?fedora} && 0%{?fedora} >= 18) || (0%{?rhel} && 0%{?rhel} >= 7)
+%global systemd (0%{?fedora} && 0%{?fedora} >= 18) || (0%{?rhel} && 0%{?rhel} >= 7)
 
 %{!?_pkgdocdir: %global _pkgdocdir %{_docdir}/%{name}-%{version}}
 
@@ -12,7 +12,8 @@ Group: System Environment/Daemons
 Requires: lib%{name} = %{version}-%{release}
 Requires (pre): shadow-utils
 
-%if is_systemd
+%if %systemd
+# Required for systemd
 Requires (post): systemd-units
 Requires (preun): systemd-units
 Requires (postun): systemd-units
@@ -64,12 +65,12 @@ required for developing applications against libopendkim.
 
 %prep
 %setup -q
-%patch0 -p1
-
-%if is_systemd
-echo "systemd YES!"
+%if %systemd
+# Apply systemd patches
+#%patch0 -p1
 %else
-echo "systemd NO!"
+# Apply SysV patches
+%patch0 -p1
 %endif
 
 %build
@@ -77,7 +78,7 @@ echo "systemd NO!"
 # properly handle 32 versus 64 bit detection and settings
 %define LIBTOOL LIBTOOL=`which libtool`
 
-%if is_systemd
+%if %systemd
 %configure --with-libmemcached --with-db
 %else
 %configure --with-db
@@ -95,7 +96,7 @@ install -d %{buildroot}%{_sysconfdir}
 install -d %{buildroot}%{_sysconfdir}/sysconfig
 install -m 0755 contrib/init/redhat/%{name}-default-keygen %{buildroot}%{_sbindir}/%{name}-default-keygen
 
-%if is_systemd
+%if %systemd
 install -d -m 0755 %{buildroot}%{_unitdir}
 install -m 0644 contrib/systemd/%{name}.service %{buildroot}%{_unitdir}/%{name}.service
 %else
@@ -357,7 +358,7 @@ getent passwd %{name} >/dev/null || \
 exit 0
 
 %post
-%if is_systemd
+%if %systemd
 if [ $1 -eq 1 ] ; then 
     # Initial installation 
     /bin/systemctl enable %{name}.service >/dev/null 2>&1 || :
@@ -369,7 +370,7 @@ fi
 %endif
 
 %preun
-%if is_systemd
+%if %systemd
 if [ $1 -eq 0 ] ; then
     # Package removal, not upgrade
     /bin/systemctl --no-reload disable %{name}.service > /dev/null 2>&1 || :
@@ -386,7 +387,7 @@ exit 0
 %endif
 
 %postun
-%if is_systemd
+%if %systemd
 /bin/systemctl daemon-reload >/dev/null 2>&1 || :
 if [ $1 -ge 1 ] ; then
     # Package upgrade, not uninstall
@@ -401,7 +402,7 @@ fi
 exit 0
 %endif
 
-%if is_systemd
+%if %systemd
 %triggerun -- %{name} < 2.8.0-1
 /bin/systemctl enable %{name}.service >/dev/null 2>&1
 /sbin/chkconfig --del %{name} >/dev/null 2>&1 || :
@@ -436,7 +437,7 @@ rm -rf %{buildroot}
 %dir %attr(750,%name,%{name}) %{_sysconfdir}/%{name}/keys
 %attr(0755,root,root) %{_sbindir}/%{name}-default-keygen
 
-%if is_systemd
+%if %systemd
 %attr(0644,root,root) %{_unitdir}/%{name}.service
 %else
 %attr(0755,root,root) %{_initrddir}/%{name}
