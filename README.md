@@ -8,7 +8,7 @@ This git repo contains:
 
 - **CONTRIB** - various files I maintain and contribute to the OpenDKIM upstream source
 
-**NOTE:** As of 2.10.1-4, the systemd and SystemV versions of this spec file have been combined, and the OpenDKIM-SysV repo at http://github.com/stevejenkins/OpenDKIM-SysV/ has been abandonded.
+**NOTE:** As of 2.10.1-5, the systemd and SystemV versions of this spec file have been combined in the OpenDKIM-Fedora repo, and the OpenDKIM-SysV repo at http://github.com/stevejenkins/OpenDKIM-SysV/ has been abandonded.
 
 **CONTRIBUTORS:** Please do pull requests in the "develop" branch only. The "master" branch is just for release versions. Thanks!
 
