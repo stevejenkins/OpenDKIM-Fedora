@@ -456,7 +456,7 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
-* Fri Mar 24 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-4
+* Tue Mar 24 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-4
 - Fixed typo in Group name
 - Added updated libtool definition
 - Additional comments in spec file
