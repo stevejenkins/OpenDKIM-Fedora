@@ -5,7 +5,7 @@
 Summary: A DomainKeys Identified Mail (DKIM) milter to sign and/or verify mail
 Name: opendkim
 Version: 2.10.1
-Release: 2%{?dist}
+Release: 4%{?dist}
 License: BSD and Sendmail
 URL: http://opendkim.org/
 Group: System Environment/Daemons
@@ -62,9 +62,10 @@ Requires: libopendkim = %{version}-%{release}
 This package contains the static libraries, headers, and other support files
 required for developing applications against libopendkim.
 
+%if 0%{?fedora} < 23
 %package sysvinit
 Summary: The SysV init script to manage the OpenDKIM milter.
-Group: System Environmnt/Daemons
+Group: System Environment/Daemons
 Requires: %{name} = %{version}-%{release}
 
 %description sysvinit
@@ -76,13 +77,20 @@ contains the SysV init script to manage the OpenDKIM milter when running a
 legacy SysV-compatible init system.
 
 It is not required when the init system used is systemd.
+%endif
 
 %prep
 %setup -q
 #%patch0 -p1
 
 %build
+# Always use system libtool instead of opendkim provided one to
+# properly handle 32 versus 64 bit detection and settings
+%define LIBTOOL LIBTOOL=`which libtool`
+
 %configure --with-libmemcached --with-db
+
+# Remove rpath
 sed -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
 sed -i 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' libtool
 
@@ -92,11 +100,13 @@ rm -rf %{buildroot}
 make DESTDIR=%{buildroot} install %{?_smp_mflags}
 install -d %{buildroot}%{_sysconfdir}
 install -d %{buildroot}%{_sysconfdir}/sysconfig
-install -d %{buildroot}%{_initrddir}
 install -d -m 0755 %{buildroot}%{_unitdir}
 install -m 0644 contrib/systemd/%{name}.service %{buildroot}%{_unitdir}/%{name}.service
-install -m 0755 contrib/init/redhat/%{name} %{buildroot}%{_initrddir}/%{name}
 install -m 0755 contrib/init/redhat/%{name}-default-keygen %{buildroot}%{_sbindir}/%{name}-default-keygen
+%if 0%{?fedora} < 23
+install -d %{buildroot}%{_initrddir}
+install -m 0755 contrib/init/redhat/%{name} %{buildroot}%{_initrddir}/%{name}
+%endif
 
 cat > %{buildroot}%{_sysconfdir}/%{name}.conf << 'EOF'
 ## BASIC OPENDKIM CONFIGURATION FILE
@@ -357,22 +367,12 @@ if [ $1 -eq 1 ] ; then
     /bin/systemctl enable %{name}.service >/dev/null 2>&1 || :
 fi
 
-%post sysvinit
-/sbin/chkconfig --add %{name} || :
-
 %preun
 if [ $1 -eq 0 ] ; then
     # Package removal, not upgrade
     /bin/systemctl --no-reload disable %{name}.service > /dev/null 2>&1 || :
     /bin/systemctl stop %{name}.service > /dev/null 2>&1 || :
 fi
-
-%preun sysvinit
-if [ $1 -eq 0 ]; then
-	service %{name} stop >/dev/null || :
-	/sbin/chkconfig --del %{name} || :
-fi
-exit 0
 
 %postun
 /bin/systemctl daemon-reload >/dev/null 2>&1 || :
@@ -381,19 +381,31 @@ if [ $1 -ge 1 ] ; then
     /bin/systemctl try-restart %{name}.service >/dev/null 2>&1 || :
 fi
 
+%triggerun -- %{name} < 2.8.0-1
+/bin/systemctl enable %{name}.service >/dev/null 2>&1
+/sbin/chkconfig --del %{name} >/dev/null 2>&1 || :
+/bin/systemctl try-restart %{name}.service >/dev/null 2>&1 || :
+
+%if 0%{?fedora} < 23
+%post sysvinit
+/sbin/chkconfig --add %{name} || :
+
+%preun sysvinit
+if [ $1 -eq 0 ]; then
+	service %{name} stop >/dev/null || :
+	/sbin/chkconfig --del %{name} || :
+fi
+exit 0
+
 %postun sysvinit
 if [ "$1" -ge "1" ] ; then
 	/sbin/service %{name} condrestart >/dev/null 2>&1 || :
 fi
 exit 0
 
-%triggerun -- %{name} < 2.8.0-1
-/bin/systemctl enable %{name}.service >/dev/null 2>&1
-/sbin/chkconfig --del %{name} >/dev/null 2>&1 || :
-/bin/systemctl try-restart %{name}.service >/dev/null 2>&1 || :
-
 %triggerpostun -n opendkim-sysvinit -- %{name} < 2.8.0-1
 /sbin/chkconfig --add %{name} >/dev/null 2>&1 || :
+%endif
 
 %post -n libopendkim -p /sbin/ldconfig
 
@@ -424,9 +436,11 @@ rm -rf %{buildroot}
 %attr(0644,root,root) %{_unitdir}/%{name}.service
 %attr(0755,root,root) %{_sbindir}/%{name}-default-keygen
 
+%if 0%{?fedora} < 23
 %files sysvinit
 %defattr(-,root,root)
 %attr(0755,root,root) %{_initrddir}/%{name}
+%endif
 
 %files -n libopendkim
 %defattr(-,root,root)
@@ -442,6 +456,15 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
+* Tue Mar 24 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-4
+- Fixed typo in Group name
+- Added updated libtool definition
+- Additional comments in spec file
+- Patch SysV initscript to stop default key generation on startup
+
+* Thu Mar 05 2015 Adam Jackson <ajax@redhat.com> 2.10.1-3
+- Drop sysvinit subpackage from F23+
+
 * Tue Mar 03 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-2
 - Added IPv6 ::1 support to TrustedHosts (RH Bugzilla #1049204)
 
