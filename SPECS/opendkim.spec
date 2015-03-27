@@ -5,7 +5,7 @@
 Summary: A DomainKeys Identified Mail (DKIM) milter to sign and/or verify mail
 Name: opendkim
 Version: 2.10.1
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: BSD and Sendmail
 URL: http://opendkim.org/
 Group: System Environment/Daemons
@@ -21,6 +21,7 @@ Requires (post): systemd-sysv
 BuildRequires: libdb-devel
 BuildRequires: libmemcached-devel
 %else
+# Required for SysV
 Requires (post): chkconfig
 Requires (preun): chkconfig, initscripts
 Requires (postun): initscripts
@@ -425,16 +426,16 @@ rm -rf %{buildroot}
 %doc README.fedora
 %config(noreplace) %{_sysconfdir}/%{name}.conf
 %config(noreplace) %{_sysconfdir}/tmpfiles.d/%{name}.conf
-%config(noreplace) %attr(640,%{name},%{name}) %{_sysconfdir}/%{name}/SigningTable
-%config(noreplace) %attr(640,%{name},%{name}) %{_sysconfdir}/%{name}/KeyTable
-%config(noreplace) %attr(640,%{name},%{name}) %{_sysconfdir}/%{name}/TrustedHosts
+%config(noreplace) %attr(0640,%{name},%{name}) %{_sysconfdir}/%{name}/SigningTable
+%config(noreplace) %attr(0640,%{name},%{name}) %{_sysconfdir}/%{name}/KeyTable
+%config(noreplace) %attr(0640,%{name},%{name}) %{_sysconfdir}/%{name}/TrustedHosts
 %config(noreplace) %{_sysconfdir}/sysconfig/%{name}
 %{_sbindir}/*
 %{_mandir}/*/*
 %dir %attr(-,%{name},%{name}) %{_localstatedir}/spool/%{name}
-%dir %attr(-,%{name},%{name}) %{_localstatedir}/run/%{name}
+%dir %attr(0775,%{name},%{name}) %{_localstatedir}/run/%{name}
 %dir %attr(-,root,%{name}) %{_sysconfdir}/%{name}
-%dir %attr(750,%name,%{name}) %{_sysconfdir}/%{name}/keys
+%dir %attr(0750,%name,%{name}) %{_sysconfdir}/%{name}/keys
 %attr(0755,root,root) %{_sbindir}/%{name}-default-keygen
 
 %if %systemd
@@ -457,6 +458,10 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
+* Thu Mar 26 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-6
+- Setting permissions special mode bit explicitly in all cases for consistency
+- Change /var/run/opendkim permissions to group writable for Bug #1120080
+
 * Wed Mar 25 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-5
 - Combined systemd and SysV spec files using conditionals
 - Drop sysvinit subpackage completely
