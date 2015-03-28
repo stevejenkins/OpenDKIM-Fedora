@@ -1,7 +1,5 @@
 %global systemd (0%{?fedora} && 0%{?fedora} >= 18) || (0%{?rhel} && 0%{?rhel} >= 7)
 
-%{!?_pkgdocdir: %global _pkgdocdir %{_docdir}/%{name}-%{version}}
-
 Summary: A DomainKeys Identified Mail (DKIM) milter to sign and/or verify mail
 Name: opendkim
 Version: 2.10.1
@@ -107,7 +105,7 @@ install -m 0755 contrib/init/redhat/%{name} %{buildroot}%{_initrddir}/%{name}
 
 cat > %{buildroot}%{_sysconfdir}/%{name}.conf << 'EOF'
 ## BASIC OPENDKIM CONFIGURATION FILE
-## See %{name}.conf(5) or %{_pkgdocdir}/%{name}.conf.sample for more
+## See %{name}.conf(5) or %{_defaultdocdir}/%{name}/%{name}.conf.sample for more
 
 ## BEFORE running OpenDKIM you must:
 
@@ -115,7 +113,7 @@ cat > %{buildroot}%{_sysconfdir}/%{name}.conf << 'EOF'
 ## - generate keys for your domain (if signing)
 ## - edit your DNS records to publish your public keys (if signing)
 
-## See %{_pkgdocdir}/INSTALL for detailed instructions.
+## See %{_defaultdocdir}/%{name}/INSTALL for detailed instructions.
 
 ## CONFIGURATION OPTIONS
 
@@ -458,7 +456,9 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
-* Thu Mar 26 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-6
+* Sat Mar 28 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-6
+- Remove global _pkgdocdir variable
+- Use defaultdocdir variable in default config file
 - Setting permissions special mode bit explicitly in all cases for consistency
 - Change /var/run/opendkim permissions to group writable for Bug #1120080
 

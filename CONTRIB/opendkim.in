@@ -1,0 +1,114 @@
+#!/bin/bash
+#
+# opendkim    Start and stop OpenDKIM.
+
+# chkconfig: - 41 59
+# description: OpenDKIM implements the DomainKeys Identified Mail (DKIM)
+#              service and a milter-based filter application that can plug
+#              in to any milter-aware MTA.
+# processname: opendkim
+# pidfile: /var/run/opendkim/opendkim.pid
+
+### BEGIN INIT INFO
+# Provides: opendkim
+# Short-Description: Start and stop OpenDKIM
+# Description:	OpenDKIM implements the DomainKeys Identified Mail
+#		(DKIM) service and a milter-based filter application
+#		that can plug in to any milter-aware MTA.
+### END INIT INFO
+
+# OpenDKIM startup script v2.0 for RHEL/CentOS/Fedora
+# by Steve Jenkins (SteveJenkins.com) - 03-24-2015
+# Based on a script by Andrew Colin Kissa (TopDog) for dkim-milter - 05-28-2009
+# - Additional functionality to prevent multiple instances and a reload
+#   handler by Chris LaJoie - 01-11-2011
+# - Added notification (along with with current PID) if "start" is issued when
+#   OpenDKIM is already running - 02-15-2011
+# - Added support to generate default keys on start - 08-22-2011
+# - Added support for /etc/sysconfig/opendkim override of default init script
+#   setup parameters - 09-19-2011
+# - Changed default stop priority - 09-19-2011
+# - Updated success and warning outputs for default key generation - 09-20-2011
+# - Changed default key directory ownership and permissions - 09-22-2011
+# - No longer automatically creates default keys on startup (user must now manually
+#   generate keys as privileged user after install) - 08-04-2014
+# - Removed uneeded code from automatic key creation - 12-09-2014
+
+. /etc/rc.d/init.d/functions
+
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+
+RETVAL=0
+prog="opendkim"
+
+DAEMON=@sbindir@/$prog
+CONF_FILE=@sysconfdir@/$prog.conf
+PID_FILE=@localstatedir@/run/$prog/$prog.pid
+
+if [ -f /etc/sysconfig/opendkim ]; then
+	. /etc/sysconfig/opendkim
+fi
+
+start() {
+	echo -n $"Starting OpenDKIM Milter: "
+	if [ -f $PID_FILE ]; then
+		PID=`cat $PID_FILE`
+		echo OpenDKIM already running as pid $PID
+	        exit 2;
+	else
+		daemon $DAEMON -x $CONF_FILE -P $PID_FILE
+		RETVAL=$?
+		[ $RETVAL -eq 0 ] && touch /var/lock/subsys/opendkim
+		echo
+		return $RETVAL
+	fi
+}
+
+stop() {
+	echo -n $"Stopping OpenDKIM Milter: "
+	killproc -p $PID_FILE opendkim
+	RETVAL=$?
+	echo
+	[ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/opendkim
+	return $RETVAL
+}
+
+restart() {
+	stop
+	start
+}
+
+reload() {
+	echo -n $"Reloading OpenDKIM Milter configuration: "
+	killproc -p $PID_FILE opendkim -SIGUSR1
+	RETVAL=$?
+	echo
+	return $RETVAL
+}
+
+case "$1" in
+  start)
+	start
+	;;
+  stop)
+	stop
+	;;
+  reload)
+	reload
+	;;
+  restart)
+	restart
+	;;
+  status)
+	status -p $PID_FILE opendkim
+	;;
+  condrestart)
+	[ -f /var/lock/subsys/opendkim ] && restart || :
+	;;
+  *)
+	echo $"Usage: $0 {start|stop|status|reload|restart|condrestart}"
+	exit 1
+esac
+
+exit $?
