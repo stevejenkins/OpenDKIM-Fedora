@@ -3,12 +3,18 @@
 Summary: A DomainKeys Identified Mail (DKIM) milter to sign and/or verify mail
 Name: opendkim
 Version: 2.10.1
-Release: 6%{?dist}
+Release: 7%{?dist}
+Group: System Environment/Daemons
 License: BSD and Sendmail
 URL: http://opendkim.org/
-Group: System Environment/Daemons
-Requires: lib%{name} = %{version}-%{release}
+Source0: http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
+
+# Required for all versions
+Requires: lib%{name}%{?_isa} = %{version}-%{release}
+Requires: sendmail-milter, libbsd
+BuildRequires: sendmail-devel, openssl-devel, libtool, pkgconfig, libbsd-devel
 Requires (pre): shadow-utils
+Requires (post): policycoreutils, policycoreutils-python
 
 %if %systemd
 # Required for systemd
@@ -25,15 +31,6 @@ Requires (preun): chkconfig, initscripts
 Requires (postun): initscripts
 BuildRequires: db4-devel
 %endif
-
-# Required for all systems
-BuildRequires: libbsd
-BuildRequires: libbsd-devel
-BuildRequires: pkgconfig
-BuildRequires: openssl-devel
-BuildRequires: sendmail-devel
-
-Source0: http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
 
 Patch0: %{name}.init.patch
 
@@ -56,7 +53,7 @@ using libopendkim.
 %package -n libopendkim-devel
 Summary: Development files for libopendkim
 Group: Development/Libraries
-Requires: libopendkim = %{version}-%{release}
+Requires: lib%{name}%{?_isa} = %{version}-%{release}
 
 %description -n libopendkim-devel
 This package contains the static libraries, headers, and other support files
@@ -456,6 +453,13 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
+* Sat Mar 28 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-7
+- added %{?_isa} to Requires where necessary
+- added sendmail-milter to Requires
+- added libtool to BuildRequires
+- moved libbsd from BuildRequires to Requires
+- added policycoreutils and policycoreutils-python to Requires (post)
+
 * Sat Mar 28 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-6
 - Remove global _pkgdocdir variable
 - Use defaultdocdir variable in default config file
