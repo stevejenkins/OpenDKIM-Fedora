@@ -1,16 +1,20 @@
 %global systemd (0%{?fedora} && 0%{?fedora} >= 18) || (0%{?rhel} && 0%{?rhel} >= 7)
 
-%{!?_pkgdocdir: %global _pkgdocdir %{_docdir}/%{name}-%{version}}
-
 Summary: A DomainKeys Identified Mail (DKIM) milter to sign and/or verify mail
 Name: opendkim
 Version: 2.10.1
-Release: 5%{?dist}
+Release: 7%{?dist}
+Group: System Environment/Daemons
 License: BSD and Sendmail
 URL: http://opendkim.org/
-Group: System Environment/Daemons
-Requires: lib%{name} = %{version}-%{release}
+Source0: http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
+
+# Required for all versions
+Requires: lib%{name}%{?_isa} = %{version}-%{release}
+Requires: sendmail-milter, libbsd
+BuildRequires: sendmail-devel, openssl-devel, libtool, pkgconfig, libbsd-devel
 Requires (pre): shadow-utils
+Requires (post): policycoreutils, policycoreutils-python
 
 %if %systemd
 # Required for systemd
@@ -21,20 +25,12 @@ Requires (post): systemd-sysv
 BuildRequires: libdb-devel
 BuildRequires: libmemcached-devel
 %else
+# Required for SysV
 Requires (post): chkconfig
 Requires (preun): chkconfig, initscripts
 Requires (postun): initscripts
 BuildRequires: db4-devel
 %endif
-
-# Required for all systems
-BuildRequires: libbsd
-BuildRequires: libbsd-devel
-BuildRequires: pkgconfig
-BuildRequires: openssl-devel
-BuildRequires: sendmail-devel
-
-Source0: http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
 
 Patch0: %{name}.init.patch
 
@@ -57,7 +53,7 @@ using libopendkim.
 %package -n libopendkim-devel
 Summary: Development files for libopendkim
 Group: Development/Libraries
-Requires: libopendkim = %{version}-%{release}
+Requires: lib%{name}%{?_isa} = %{version}-%{release}
 
 %description -n libopendkim-devel
 This package contains the static libraries, headers, and other support files
@@ -106,7 +102,7 @@ install -m 0755 contrib/init/redhat/%{name} %{buildroot}%{_initrddir}/%{name}
 
 cat > %{buildroot}%{_sysconfdir}/%{name}.conf << 'EOF'
 ## BASIC OPENDKIM CONFIGURATION FILE
-## See %{name}.conf(5) or %{_pkgdocdir}/%{name}.conf.sample for more
+## See %{name}.conf(5) or %{_defaultdocdir}/%{name}/%{name}.conf.sample for more
 
 ## BEFORE running OpenDKIM you must:
 
@@ -114,7 +110,7 @@ cat > %{buildroot}%{_sysconfdir}/%{name}.conf << 'EOF'
 ## - generate keys for your domain (if signing)
 ## - edit your DNS records to publish your public keys (if signing)
 
-## See %{_pkgdocdir}/INSTALL for detailed instructions.
+## See %{_defaultdocdir}/%{name}/INSTALL for detailed instructions.
 
 ## CONFIGURATION OPTIONS
 
@@ -425,16 +421,16 @@ rm -rf %{buildroot}
 %doc README.fedora
 %config(noreplace) %{_sysconfdir}/%{name}.conf
 %config(noreplace) %{_sysconfdir}/tmpfiles.d/%{name}.conf
-%config(noreplace) %attr(640,%{name},%{name}) %{_sysconfdir}/%{name}/SigningTable
-%config(noreplace) %attr(640,%{name},%{name}) %{_sysconfdir}/%{name}/KeyTable
-%config(noreplace) %attr(640,%{name},%{name}) %{_sysconfdir}/%{name}/TrustedHosts
+%config(noreplace) %attr(0640,%{name},%{name}) %{_sysconfdir}/%{name}/SigningTable
+%config(noreplace) %attr(0640,%{name},%{name}) %{_sysconfdir}/%{name}/KeyTable
+%config(noreplace) %attr(0640,%{name},%{name}) %{_sysconfdir}/%{name}/TrustedHosts
 %config(noreplace) %{_sysconfdir}/sysconfig/%{name}
 %{_sbindir}/*
 %{_mandir}/*/*
 %dir %attr(-,%{name},%{name}) %{_localstatedir}/spool/%{name}
-%dir %attr(-,%{name},%{name}) %{_localstatedir}/run/%{name}
+%dir %attr(0775,%{name},%{name}) %{_localstatedir}/run/%{name}
 %dir %attr(-,root,%{name}) %{_sysconfdir}/%{name}
-%dir %attr(750,%name,%{name}) %{_sysconfdir}/%{name}/keys
+%dir %attr(0750,%name,%{name}) %{_sysconfdir}/%{name}/keys
 %attr(0755,root,root) %{_sbindir}/%{name}-default-keygen
 
 %if %systemd
@@ -457,6 +453,19 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
+* Sat Mar 28 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-7
+- added %{?_isa} to Requires where necessary
+- added sendmail-milter to Requires
+- added libtool to BuildRequires
+- moved libbsd from BuildRequires to Requires
+- added policycoreutils and policycoreutils-python to Requires (post)
+
+* Sat Mar 28 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-6
+- Remove global _pkgdocdir variable
+- Use defaultdocdir variable in default config file
+- Setting permissions special mode bit explicitly in all cases for consistency
+- Change /var/run/opendkim permissions to group writable for Bug #1120080
+
 * Wed Mar 25 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-5
 - Combined systemd and SysV spec files using conditionals
 - Drop sysvinit subpackage completely
