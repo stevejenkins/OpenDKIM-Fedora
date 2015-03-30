@@ -3,7 +3,7 @@
 Summary: A DomainKeys Identified Mail (DKIM) milter to sign and/or verify mail
 Name: opendkim
 Version: 2.10.1
-Release: 7%{?dist}
+Release: 8%{?dist}
 Group: System Environment/Daemons
 License: BSD and Sendmail
 URL: http://opendkim.org/
@@ -11,8 +11,7 @@ Source0: http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
 
 # Required for all versions
 Requires: lib%{name}%{?_isa} = %{version}-%{release}
-Requires: sendmail-milter, libbsd
-BuildRequires: sendmail-devel, openssl-devel, libtool, pkgconfig, libbsd-devel
+BuildRequires: sendmail-devel, openssl-devel, libtool, pkgconfig, libbsd, libbsd-devel
 Requires (pre): shadow-utils
 Requires (post): policycoreutils, policycoreutils-python
 
@@ -254,10 +253,10 @@ Last updated: Mar 3, 2015 by Steve Jenkins (steve@stevejenkins.com)
 
 Generating keys for OpenDKIM
 ============================
-After installing the opendkim package, you MUST generate a pair of keys (public and private) before
-attempting to start the opendkim service.
+After installing the %{name} package, you MUST generate a pair of keys (public and private) before
+attempting to start the %{name} service.
 
-A valid private key must exist in the location expected by /etc/opendkim.conf before the service will start.
+A valid private key must exist in the location expected by %{_sysconfdir}/%{name}.conf before the service will start.
 
 A matching public key must be included in your domain's DNS records before remote systems can validate
 your outgoing mail's DKIM signature.
@@ -267,10 +266,10 @@ Generating Keys Automatically
 =============================
 To automatically create a pair of default keys for the local domain, do:
 
-% sudo /usr/sbin/opendkim-default-keygen
+% sudo %{_sbindir}/%{name}-default-keygen
 
 The default keygen script will attempt to fetch the local domain name, generate a private and public key for
-the domain, then save them in /etc/opendkim/keys as default.private and default.txt with the proper
+the domain, then save them in %{_sysconfdir}/%{name}/keys as default.private and default.txt with the proper
 ownership and permissions.
 
 NOTE: The default key generation script MUST be run by a privileged user (or root). Otherwise, the resulting
@@ -283,32 +282,32 @@ A privileged user (or root) can manually generate a set of keys by doing the fol
 
 1) Create a directory to store the new keys:
 
-% sudo mkdir /etc/opendkim/keys/example.com
+% sudo mkdir %{_sysconfdir}/%{name}/keys/example.com
 
 2) Generate keys in that directory for a specific domain name and selector:
 
-% sudo /usr/sbin/opendkim-genkey -D /etc/opendkim/keys/example.com/ -d example.com -s default
+% sudo %{_sbindir}/%{name}-genkey -D %{_sysconfdir}/%{name}/keys/example.com/ -d example.com -s default
 
 3) Set the proper ownership for the directory and private key:
 
-% sudo chown -R root:opendkim /etc/opendkim/keys/example.com
+% sudo chown -R root:%{name} %{_sysconfdir}/%{name}/keys/example.com
 
 4) Set secure permissions for the private key:
 
-% sudo chmod 640 /etc/opendkim/keys/example.com/default.private
+% sudo chmod 640 %{_sysconfdir}/%{name}/keys/example.com/default.private
 
 5) Set standard permissions for the public key:
 
-% sudo chmod 644 /etc/opendkim/keys/example.com/default.txt
+% sudo chmod 644 %{_sysconfdir}/%{name}/keys/example.com/default.txt
 
 
 Updating Key Location(s) in Configuration Files
 ===============================================
-If you run the opendkim-default-keygen script, the default keys will be saved in /etc/opendkim/keys as
-default.private and default.txt, which is the location expected by the default /etc/opendkim.conf file.
+If you run the %{name}-default-keygen script, the default keys will be saved in %{_sysconfdir}/%{name}/keys as
+default.private and default.txt, which is the location expected by the default %{_sysconfdir}/%{name}.conf file.
 
-If you manually generate your own keys, you must update the key location and name in /etc/opendkim.conf
-before attempting to start the opendkim service.
+If you manually generate your own keys, you must update the key location and name in %{_sysconfdir}/%{name}.conf
+before attempting to start the %{name} service.
 
 
 Additional Configuration Help
@@ -341,7 +340,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/%{name}
 mkdir %{buildroot}%{_sysconfdir}/%{name}/keys
 
 install -m 0755 stats/%{name}-reportstats %{buildroot}%{_prefix}/sbin/%{name}-reportstats
-sed -i 's|^OPENDKIMSTATSDIR="/var/db/opendkim"|OPENDKIMSTATSDIR="%{_localstatedir}/spool/%{name}"|g' %{buildroot}%{_prefix}/sbin/%{name}-reportstats
+sed -i 's|^OPENDKIMSTATSDIR="/var/db/%{name}"|OPENDKIMSTATSDIR="%{_localstatedir}/spool/%{name}"|g' %{buildroot}%{_prefix}/sbin/%{name}-reportstats
 sed -i 's|^OPENDKIMDATOWNER="mailnull:mailnull"|OPENDKIMDATOWNER="%{name}:%{name}"|g' %{buildroot}%{_prefix}/sbin/%{name}-reportstats
 
 chmod 0644 contrib/convert/convert_keylist.sh
@@ -413,8 +412,12 @@ exit 0
 rm -rf %{buildroot}
 
 %files
-%defattr(-,root,root)
-%doc FEATURES KNOWNBUGS LICENSE LICENSE.Sendmail RELEASE_NOTES RELEASE_NOTES.Sendmail INSTALL
+%if 0%{?_licensedir:1}
+%license LICENSE LICENSE.Sendmail
+%else
+%doc LICENSE LICENSE.Sendmail
+%endif
+%doc FEATURES KNOWNBUGS RELEASE_NOTES RELEASE_NOTES.Sendmail INSTALL
 %doc contrib/convert/convert_keylist.sh %{name}/*.sample
 %doc %{name}/%{name}.conf.simple-verify %{name}/%{name}.conf.simple
 %doc %{name}/README contrib/lua/*.lua
@@ -440,12 +443,10 @@ rm -rf %{buildroot}
 %endif
 
 %files -n libopendkim
-%defattr(-,root,root)
 %doc LICENSE LICENSE.Sendmail README
 %{_libdir}/libopendkim.so.*
 
 %files -n libopendkim-devel
-%defattr(-,root,root)
 %doc LICENSE LICENSE.Sendmail
 %doc libopendkim/docs/*.html
 %{_includedir}/%{name}
@@ -453,6 +454,13 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
+* Sun Mar 29 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-8
+- removed unecessary Requires packages
+- moved libbsd back to BuildRequires
+- removed unecessary %defattr
+- added support for %license in place of %doc
+- Changed some %{name} macro usages
+
 * Sat Mar 28 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-7
 - added %{?_isa} to Requires where necessary
 - added sendmail-milter to Requires
