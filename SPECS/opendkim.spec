@@ -19,6 +19,10 @@ Requires (pre): shadow-utils
 # Required for Fedora
 %if 0%{?fedora}
 BuildRequires: opendbx
+%endif
+
+#Required for all but EL5
+%if (0%{?fedora} && 0%{?fedora} >= 18) || (0%{?rhel} && 0%{?rhel} >= 6)
 Requires (post): policycoreutils, policycoreutils-python
 %endif
 
@@ -475,10 +479,10 @@ rm -rf %{buildroot}
 
 %changelog
 * Thu Apr 02 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-9
+- policycoreutils* now only required for Fedora and EL6+
+- Added --with-obdx configure support for Fedora builds
 - Changed a few macros
 - Added additional %license support
-- Changed policycoreutils* Requires to Fedora only
-- Added --with-obdx configure support for Fedora builds
 
 * Sun Mar 29 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-8
 - removed unecessary Requires packages
