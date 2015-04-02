@@ -1,19 +1,26 @@
 %global systemd (0%{?fedora} && 0%{?fedora} >= 18) || (0%{?rhel} && 0%{?rhel} >= 7)
+%global upname OpenDKIM
+%global bigname OPENDKIM
 
 Summary: A DomainKeys Identified Mail (DKIM) milter to sign and/or verify mail
 Name: opendkim
 Version: 2.10.1
-Release: 8%{?dist}
+Release: 9%{?dist}
 Group: System Environment/Daemons
 License: BSD and Sendmail
-URL: http://opendkim.org/
+URL: http://%{name}.org/
 Source0: http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
 
 # Required for all versions
 Requires: lib%{name}%{?_isa} = %{version}-%{release}
 BuildRequires: sendmail-devel, openssl-devel, libtool, pkgconfig, libbsd, libbsd-devel
 Requires (pre): shadow-utils
+
+# Required for Fedora
+%if 0%{?fedora}
+BuildRequires: opendbx
 Requires (post): policycoreutils, policycoreutils-python
+%endif
 
 %if %systemd
 # Required for systemd
@@ -36,7 +43,7 @@ Patch0: %{name}.init.patch
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 %description
-OpenDKIM allows signing and/or verification of email through an open source
+%{upname} allows signing and/or verification of email through an open source
 library that implements the DKIM service, plus a milter-based filter
 application that can plug in to any milter-aware MTA, including sendmail,
 Postfix, or any other MTA that supports the milter protocol.
@@ -50,7 +57,7 @@ This package contains the library files required for running services built
 using libopendkim.
 
 %package -n libopendkim-devel
-Summary: Development files for libopendkim
+Summary: Development files for lib%{name}
 Group: Development/Libraries
 Requires: lib%{name}%{?_isa} = %{version}-%{release}
 
@@ -69,12 +76,16 @@ required for developing applications against libopendkim.
 %endif
 
 %build
-# Always use system libtool instead of opendkim provided one to
+# Always use system libtool instead of pacakge-provided one to
 # properly handle 32 versus 64 bit detection and settings
 %define LIBTOOL LIBTOOL=`which libtool`
 
 %if %systemd
+%if 0%{?fedora}
+%configure --with-obdx --with-libmemcached --with-db
+%else
 %configure --with-libmemcached --with-db
+%endif
 %else
 %configure --with-db
 %endif
@@ -100,12 +111,12 @@ install -m 0755 contrib/init/redhat/%{name} %{buildroot}%{_initrddir}/%{name}
 %endif
 
 cat > %{buildroot}%{_sysconfdir}/%{name}.conf << 'EOF'
-## BASIC OPENDKIM CONFIGURATION FILE
+## BASIC %{bigname} CONFIGURATION FILE
 ## See %{name}.conf(5) or %{_defaultdocdir}/%{name}/%{name}.conf.sample for more
 
-## BEFORE running OpenDKIM you must:
+## BEFORE running %{upname} you must:
 
-## - make your MTA (Postfix, Sendmail, etc.) aware of OpenDKIM
+## - make your MTA (Postfix, Sendmail, etc.) aware of %{upname}
 ## - generate keys for your domain (if signing)
 ## - edit your DNS records to publish your public keys (if signing)
 
@@ -143,7 +154,7 @@ Socket	inet:8891@localhost
 Umask	002
 
 # This specifies a text file in which to store DKIM transaction statistics.
-# OpenDKIM must be manually compiled with --enable-stats to enable this feature.
+# %{upname} must be manually compiled with --enable-stats to enable this feature.
 #Statistics	%{_localstatedir}/spool/%{name}/stats.dat
 
 ## SIGNING OPTIONS
@@ -167,13 +178,13 @@ MinimumKeyBits 1024
 KeyFile	%{_sysconfdir}/%{name}/keys/default.private
 
 # Gives the location of a file mapping key names to signing keys. In simple terms,
-# this tells OpenDKIM where to find your keys. If present, overrides any KeyFile
+# this tells %{upname} where to find your keys. If present, overrides any KeyFile
 # directive in the configuration file. Requires SigningTable be enabled.
 #KeyTable	%{_sysconfdir}/%{name}/KeyTable
 
 # Defines a table used to select one or more signatures to apply to a message based
 # on the address found in the From: header field. In simple terms, this tells
-# OpenDKIM how to use your keys. Requires KeyTable be enabled.
+# %{upname} how to use your keys. Requires KeyTable be enabled.
 #SigningTable	refile:%{_sysconfdir}/%{name}/SigningTable
 
 # Identifies a set of "external" hosts that may send mail through the server as one
@@ -197,14 +208,14 @@ EOF
 
 mkdir -p %{buildroot}%{_sysconfdir}/%{name}
 cat > %{buildroot}%{_sysconfdir}/%{name}/SigningTable << 'EOF'
-# OPENDKIM SIGNING TABLE
+# %{bigname} SIGNING TABLE
 # This table controls how to apply one or more signatures to outgoing messages based
 # on the address found in the From: header field. In simple terms, this tells
-# OpenDKIM "how" to apply your keys.
+# %{upname} "how" to apply your keys.
 
 # To use this file, uncomment the SigningTable option in %{_sysconfdir}/%{name}.conf,
 # then uncomment one of the usage examples below and replace example.com with your
-# domain name, then restart OpenDKIM.
+# domain name, then restart %{upname}.
 
 # WILDCARD EXAMPLE
 # Enables signing for any address on the listed domain(s), but will work only if
@@ -225,18 +236,18 @@ cat > %{buildroot}%{_sysconfdir}/%{name}/SigningTable << 'EOF'
 EOF
 
 cat > %{buildroot}%{_sysconfdir}/%{name}/KeyTable << 'EOF'
-# OPENDKIM KEY TABLE
+# %{bigname} KEY TABLE
 # To use this file, uncomment the #KeyTable option in %{_sysconfdir}/%{name}.conf,
 # then uncomment the following line and replace example.com with your domain
-# name, then restart OpenDKIM. Additional keys may be added on separate lines.
+# name, then restart %{upname}. Additional keys may be added on separate lines.
 
 #default._domainkey.example.com example.com:default:%{_sysconfdir}/%{name}/keys/default.private
 EOF
 
 cat > %{buildroot}%{_sysconfdir}/%{name}/TrustedHosts << 'EOF'
-# OPENDKIM TRUSTED HOSTS
+# %{bigname} TRUSTED HOSTS
 # To use this file, uncomment the #ExternalIgnoreList and/or the #InternalHosts
-# option in %{_sysconfdir}/%{name}.conf then restart OpenDKIM. Additional hosts
+# option in %{_sysconfdir}/%{name}.conf then restart %{upname}. Additional hosts
 # may be added on separate lines (IP addresses, hostnames, or CIDR ranges).
 # The localhost IP (127.0.0.1) should always be the first entry in this file.
 127.0.0.1
@@ -247,11 +258,11 @@ EOF
 
 cat > README.fedora << 'EOF'
 #####################################
-#FEDORA-SPECIFIC README FOR OPENDKIM#
+#FEDORA-SPECIFIC README FOR %{bigname}#
 #####################################
 Last updated: Mar 3, 2015 by Steve Jenkins (steve@stevejenkins.com)
 
-Generating keys for OpenDKIM
+Generating keys for %{upname}
 ============================
 After installing the %{name} package, you MUST generate a pair of keys (public and private) before
 attempting to start the %{name} service.
@@ -312,15 +323,15 @@ before attempting to start the %{name} service.
 
 Additional Configuration Help
 =============================
-For help configuring your MTA (Postfix, Sendmail, etc.) with OpenDKIM, setting up DNS records with your
-public DKIM key, as well as instructions on configuring OpenDKIM to sign outgoing mail for multiple
+For help configuring your MTA (Postfix, Sendmail, etc.) with %{upname}, setting up DNS records with your
+public DKIM key, as well as instructions on configuring %{upname} to sign outgoing mail for multiple
 domains, follow the how-to at:
 
 http://wp.me/p1iGgP-ou
 
-Official documentation for OpenDKIM is available at http://opendkim.org/
+Official documentation for %{upname} is available at http://%{name}.org/
 
-OpenDKIM mailing lists are available at http://lists.opendkim.org/
+%{upname} mailing lists are available at http://lists.%{name}.org/
 
 ###
 EOF
@@ -340,8 +351,8 @@ mkdir -p %{buildroot}%{_sysconfdir}/%{name}
 mkdir %{buildroot}%{_sysconfdir}/%{name}/keys
 
 install -m 0755 stats/%{name}-reportstats %{buildroot}%{_prefix}/sbin/%{name}-reportstats
-sed -i 's|^OPENDKIMSTATSDIR="/var/db/%{name}"|OPENDKIMSTATSDIR="%{_localstatedir}/spool/%{name}"|g' %{buildroot}%{_prefix}/sbin/%{name}-reportstats
-sed -i 's|^OPENDKIMDATOWNER="mailnull:mailnull"|OPENDKIMDATOWNER="%{name}:%{name}"|g' %{buildroot}%{_prefix}/sbin/%{name}-reportstats
+sed -i 's|^%{bigname}STATSDIR="/var/db/%{name}"|%{bigname}STATSDIR="%{_localstatedir}/spool/%{name}"|g' %{buildroot}%{_prefix}/sbin/%{name}-reportstats
+sed -i 's|^%{bigname}DATOWNER="mailnull:mailnull"|%{bigname}DATOWNER="%{name}:%{name}"|g' %{buildroot}%{_prefix}/sbin/%{name}-reportstats
 
 chmod 0644 contrib/convert/convert_keylist.sh
 
@@ -349,7 +360,7 @@ chmod 0644 contrib/convert/convert_keylist.sh
 getent group %{name} >/dev/null || groupadd -r %{name}
 getent passwd %{name} >/dev/null || \
 	useradd -r -g %{name} -G mail -d %{_localstatedir}/run/%{name} -s /sbin/nologin \
-	-c "OpenDKIM Milter" %{name}
+	-c "%{upname} Milter" %{name}
 exit 0
 
 %post
@@ -443,17 +454,32 @@ rm -rf %{buildroot}
 %endif
 
 %files -n libopendkim
-%doc LICENSE LICENSE.Sendmail README
-%{_libdir}/libopendkim.so.*
+%if 0%{?_licensedir:1}
+%license LICENSE LICENSE.Sendmail
+%else
+%doc LICENSE LICENSE.Sendmail
+%endif
+%doc README
+%{_libdir}/lib%{name}.so.*
 
 %files -n libopendkim-devel
+%if 0%{?_licensedir:1}
+%license LICENSE LICENSE.Sendmail
+%else
 %doc LICENSE LICENSE.Sendmail
-%doc libopendkim/docs/*.html
+%endif
+%doc lib%{name}/docs/*.html
 %{_includedir}/%{name}
 %{_libdir}/*.so
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
+* Thu Apr 02 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-9
+- Changed a few macros
+- Added additional %license support
+- Changed policycoreutils* Requires to Fedora only
+- Added --with-obdx configure support for Fedora builds
+
 * Sun Mar 29 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-8
 - removed unecessary Requires packages
 - moved libbsd back to BuildRequires
