@@ -5,7 +5,7 @@
 Summary: A DomainKeys Identified Mail (DKIM) milter to sign and/or verify mail
 Name: opendkim
 Version: 2.10.1
-Release: 9%{?dist}
+Release: 10%{?dist}
 Group: System Environment/Daemons
 License: BSD and Sendmail
 URL: http://%{name}.org/
@@ -21,9 +21,8 @@ Requires (pre): shadow-utils
 BuildRequires: opendbx
 %endif
 
-#Required for all but EL5
-%if (0%{?fedora} && 0%{?fedora} >= 18) || (0%{?rhel} && 0%{?rhel} >= 6)
-Requires (post): policycoreutils, policycoreutils-python
+%if 0%{?rhel} && 0%{?rhel} == 5
+Requires (post): policycoreutils
 %endif
 
 %if %systemd
@@ -478,6 +477,9 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
+* Fri Apr 03 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-10
+- policycoreutils now only required for EL5
+
 * Thu Apr 02 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-9
 - policycoreutils* now only required for Fedora and EL6+
 - Added --with-obdx configure support for Fedora builds
