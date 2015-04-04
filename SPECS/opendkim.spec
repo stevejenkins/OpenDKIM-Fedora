@@ -5,7 +5,7 @@
 Summary: A DomainKeys Identified Mail (DKIM) milter to sign and/or verify mail
 Name: opendkim
 Version: 2.10.1
-Release: 10%{?dist}
+Release: 11%{?dist}
 Group: System Environment/Daemons
 License: BSD and Sendmail
 URL: http://%{name}.org/
@@ -14,7 +14,7 @@ Source0: http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
 # Required for all versions
 Requires: lib%{name}%{?_isa} = %{version}-%{release}
 BuildRequires: sendmail-devel, openssl-devel, libtool, pkgconfig, libbsd, libbsd-devel
-Requires (pre): shadow-utils
+Requires(pre): shadow-utils
 
 # Required for Fedora
 %if 0%{?fedora}
@@ -22,22 +22,22 @@ BuildRequires: opendbx
 %endif
 
 %if 0%{?rhel} && 0%{?rhel} == 5
-Requires (post): policycoreutils
+Requires(post): policycoreutils
 %endif
 
 %if %systemd
 # Required for systemd
-Requires (post): systemd-units
-Requires (preun): systemd-units
-Requires (postun): systemd-units
-Requires (post): systemd-sysv
+Requires(post): systemd-units
+Requires(preun): systemd-units
+Requires(postun): systemd-units
+Requires(post): systemd-sysv
 BuildRequires: libdb-devel
 BuildRequires: libmemcached-devel
 %else
 # Required for SysV
-Requires (post): chkconfig
-Requires (preun): chkconfig, initscripts
-Requires (postun): initscripts
+Requires(post): chkconfig
+Requires(preun): chkconfig, initscripts
+Requires(postun): initscripts
 BuildRequires: db4-devel
 %endif
 
@@ -477,6 +477,9 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
+* Fri Apr 03 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-11
+- Cleaned up some spacing
+
 * Fri Apr 03 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-10
 - policycoreutils now only required for EL5
 
@@ -498,7 +501,7 @@ rm -rf %{buildroot}
 - added sendmail-milter to Requires
 - added libtool to BuildRequires
 - moved libbsd from BuildRequires to Requires
-- added policycoreutils and policycoreutils-python to Requires (post)
+- added policycoreutils and policycoreutils-python to Requires(post)
 
 * Sat Mar 28 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-6
 - Remove global _pkgdocdir variable
