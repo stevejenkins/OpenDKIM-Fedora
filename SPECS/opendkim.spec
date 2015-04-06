@@ -83,14 +83,10 @@ required for developing applications against libopendkim.
 # properly handle 32 versus 64 bit detection and settings
 %define LIBTOOL LIBTOOL=`which libtool`
 
-%if %systemd
 %if 0%{?fedora}
 %configure --with-obdx --with-libmemcached --with-db
 %else
-%configure --with-libmemcached --with-db
-%endif
-%else
-%configure --with-db
+%configure --with-odbx --with-db
 %endif
 
 # Remove rpath
@@ -324,6 +320,21 @@ If you manually generate your own keys, you must update the key location and nam
 before attempting to start the %{name} service.
 
 
+Using %upname with SQL Datasets
+================================
+If you have %upname configured to use SQL datasets on a systemd-based server, it might be necessary to start the
+%name service after the database servers by referencing your database unit file(s) in the "After" section of the
+%upname unit file.
+
+For example, if using both MariaDB and PostgreSQL, in /usr/lib/systemd/system/opendkim.service change:
+
+After=network.target nss-lookup.target syslog.target
+
+to:
+
+After=network.target nss-lookup.target syslog.target mariadb.service postgresql.service
+
+
 Additional Configuration Help
 =============================
 For help configuring your MTA (Postfix, Sendmail, etc.) with %{upname}, setting up DNS records with your
@@ -477,8 +488,10 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
-* Fri Apr 03 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-11
+* Mon Apr 06 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-11
 - Cleaned up some spacing
+- Added --with-obdx support for all branches
+- Added comments to README.Fedora to address Bug #1209009
 
 * Fri Apr 03 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-10
 - policycoreutils now only required for EL5
