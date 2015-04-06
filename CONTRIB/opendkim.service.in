@@ -1,5 +1,5 @@
 # If you are using OpenDKIM with SQL datasets it might be necessary to start OpenDKIM after the database servers.
-# For example, if using both MariaDB and PostgreSQL, change "After=" in the "[Unit]" section:
+# For example, if using both MariaDB and PostgreSQL, change "After=" in the "[Unit]" section to:
 # After=network.target nss-lookup.target syslog.target mariadb.service postgresql.service
 
 [Unit]
