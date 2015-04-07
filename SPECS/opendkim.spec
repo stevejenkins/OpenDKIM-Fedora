@@ -5,7 +5,7 @@
 Summary: A DomainKeys Identified Mail (DKIM) milter to sign and/or verify mail
 Name: opendkim
 Version: 2.10.1
-Release: 10%{?dist}
+Release: 12%{?dist}
 Group: System Environment/Daemons
 License: BSD and Sendmail
 URL: http://%{name}.org/
@@ -13,31 +13,26 @@ Source0: http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
 
 # Required for all versions
 Requires: lib%{name}%{?_isa} = %{version}-%{release}
-BuildRequires: sendmail-devel, openssl-devel, libtool, pkgconfig, libbsd, libbsd-devel
-Requires (pre): shadow-utils
-
-# Required for Fedora
-%if 0%{?fedora}
-BuildRequires: opendbx
-%endif
+BuildRequires: sendmail-devel, openssl-devel, libtool, pkgconfig, libbsd, libbsd-devel, opendbx-devel
+Requires(pre): shadow-utils
 
 %if 0%{?rhel} && 0%{?rhel} == 5
-Requires (post): policycoreutils
+Requires(post): policycoreutils
 %endif
 
 %if %systemd
 # Required for systemd
-Requires (post): systemd-units
-Requires (preun): systemd-units
-Requires (postun): systemd-units
-Requires (post): systemd-sysv
+Requires(post): systemd-units
+Requires(preun): systemd-units
+Requires(postun): systemd-units
+Requires(post): systemd-sysv
 BuildRequires: libdb-devel
 BuildRequires: libmemcached-devel
 %else
 # Required for SysV
-Requires (post): chkconfig
-Requires (preun): chkconfig, initscripts
-Requires (postun): initscripts
+Requires(post): chkconfig
+Requires(preun): chkconfig, initscripts
+Requires(postun): initscripts
 BuildRequires: db4-devel
 %endif
 
@@ -83,14 +78,10 @@ required for developing applications against libopendkim.
 # properly handle 32 versus 64 bit detection and settings
 %define LIBTOOL LIBTOOL=`which libtool`
 
-%if %systemd
 %if 0%{?fedora}
-%configure --with-obdx --with-libmemcached --with-db
+%configure --with-odbx --with-libmemcached --with-db
 %else
-%configure --with-libmemcached --with-db
-%endif
-%else
-%configure --with-db
+%configure --with-odbx --with-db
 %endif
 
 # Remove rpath
@@ -324,6 +315,21 @@ If you manually generate your own keys, you must update the key location and nam
 before attempting to start the %{name} service.
 
 
+Using %upname with SQL Datasets
+================================
+If you have %upname configured to use SQL datasets on a systemd-based server, it might be necessary to start the
+%name service after the database servers by referencing your database unit file(s) in the "After" section of the
+%upname unit file.
+
+For example, if using both MariaDB and PostgreSQL, in /usr/lib/systemd/system/opendkim.service change:
+
+After=network.target nss-lookup.target syslog.target
+
+to:
+
+After=network.target nss-lookup.target syslog.target mariadb.service postgresql.service
+
+
 Additional Configuration Help
 =============================
 For help configuring your MTA (Postfix, Sendmail, etc.) with %{upname}, setting up DNS records with your
@@ -477,6 +483,16 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
+* Mon Apr 06 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-12
+- BuildRequires opendbx-devel instead of opendbx
+- Fixed typo in configure flag
+
+* Mon Apr 06 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-11
+- All branches now require opendbx
+- All branches now configure with --with-obdx flag
+- Added comments to README.Fedora to address Bug #1209009
+- Cleaned up some spacing
+
 * Fri Apr 03 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-10
 - policycoreutils now only required for EL5
 
@@ -498,7 +514,7 @@ rm -rf %{buildroot}
 - added sendmail-milter to Requires
 - added libtool to BuildRequires
 - moved libbsd from BuildRequires to Requires
-- added policycoreutils and policycoreutils-python to Requires (post)
+- added policycoreutils and policycoreutils-python to Requires(post)
 
 * Sat Mar 28 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-6
 - Remove global _pkgdocdir variable
