@@ -484,10 +484,10 @@ rm -rf %{buildroot}
 
 %changelog
 * Mon Apr 06 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-11
-- Cleaned up some spacing
 - All branches now require opendbx
 - All branches now configure with --with-obdx flag
 - Added comments to README.Fedora to address Bug #1209009
+- Cleaned up some spacing
 
 * Fri Apr 03 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-10
 - policycoreutils now only required for EL5
