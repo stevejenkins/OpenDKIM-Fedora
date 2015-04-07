@@ -5,7 +5,7 @@
 Summary: A DomainKeys Identified Mail (DKIM) milter to sign and/or verify mail
 Name: opendkim
 Version: 2.10.1
-Release: 11%{?dist}
+Release: 12%{?dist}
 Group: System Environment/Daemons
 License: BSD and Sendmail
 URL: http://%{name}.org/
@@ -13,7 +13,7 @@ Source0: http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
 
 # Required for all versions
 Requires: lib%{name}%{?_isa} = %{version}-%{release}
-BuildRequires: sendmail-devel, openssl-devel, libtool, pkgconfig, libbsd, libbsd-devel, opendbx
+BuildRequires: sendmail-devel, openssl-devel, libtool, pkgconfig, libbsd, libbsd-devel, opendbx-devel
 Requires(pre): shadow-utils
 
 %if 0%{?rhel} && 0%{?rhel} == 5
@@ -79,7 +79,7 @@ required for developing applications against libopendkim.
 %define LIBTOOL LIBTOOL=`which libtool`
 
 %if 0%{?fedora}
-%configure --with-obdx --with-libmemcached --with-db
+%configure --with-odbx --with-libmemcached --with-db
 %else
 %configure --with-odbx --with-db
 %endif
@@ -483,6 +483,10 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
+* Mon Apr 06 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-12
+- BuildRequires opendbx-devel instead of opendbx
+- Fix typo in configure flag
+
 * Mon Apr 06 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-11
 - All branches now require opendbx
 - All branches now configure with --with-obdx flag
