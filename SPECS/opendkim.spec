@@ -13,13 +13,8 @@ Source0: http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
 
 # Required for all versions
 Requires: lib%{name}%{?_isa} = %{version}-%{release}
-BuildRequires: sendmail-devel, openssl-devel, libtool, pkgconfig, libbsd, libbsd-devel
+BuildRequires: sendmail-devel, openssl-devel, libtool, pkgconfig, libbsd, libbsd-devel, opendbx
 Requires(pre): shadow-utils
-
-# Required for Fedora
-%if 0%{?fedora}
-BuildRequires: opendbx
-%endif
 
 %if 0%{?rhel} && 0%{?rhel} == 5
 Requires(post): policycoreutils
@@ -490,7 +485,8 @@ rm -rf %{buildroot}
 %changelog
 * Mon Apr 06 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-11
 - Cleaned up some spacing
-- Added --with-obdx support for all branches
+- All branches now require opendbx
+- All branches now configure with --with-obdx flag
 - Added comments to README.Fedora to address Bug #1209009
 
 * Fri Apr 03 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-10
