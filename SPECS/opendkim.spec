@@ -485,7 +485,7 @@ rm -rf %{buildroot}
 %changelog
 * Mon Apr 06 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-12
 - BuildRequires opendbx-devel instead of opendbx
-- Fix typo in configure flag
+- Fixed typo in configure flag
 
 * Mon Apr 06 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-11
 - All branches now require opendbx
