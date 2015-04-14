@@ -5,7 +5,7 @@
 Summary: A DomainKeys Identified Mail (DKIM) milter to sign and/or verify mail
 Name: opendkim
 Version: 2.10.1
-Release: 12%{?dist}
+Release: 13%{?dist}
 Group: System Environment/Daemons
 License: BSD and Sendmail
 URL: http://%{name}.org/
@@ -85,26 +85,24 @@ required for developing applications against libopendkim.
 %endif
 
 # Remove rpath
-sed -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
-sed -i 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' libtool
+%{__sed} -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
+%{__sed} -i 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' libtool
 
 %install
-rm -rf %{buildroot}
-
-make DESTDIR=%{buildroot} install %{?_smp_mflags}
-install -d %{buildroot}%{_sysconfdir}
-install -d %{buildroot}%{_sysconfdir}/sysconfig
-install -m 0755 contrib/init/redhat/%{name}-default-keygen %{buildroot}%{_sbindir}/%{name}-default-keygen
+%{__make} DESTDIR=%{buildroot} install %{?_smp_mflags}
+%{__install} -d %{buildroot}%{_sysconfdir}
+%{__install} -d %{buildroot}%{_sysconfdir}/sysconfig
+%{__install} -m 0755 contrib/init/redhat/%{name}-default-keygen %{buildroot}%{_sbindir}/%{name}-default-keygen
 
 %if %systemd
-install -d -m 0755 %{buildroot}%{_unitdir}
-install -m 0644 contrib/systemd/%{name}.service %{buildroot}%{_unitdir}/%{name}.service
+%{__install} -d -m 0755 %{buildroot}%{_unitdir}
+%{__install} -m 0644 contrib/systemd/%{name}.service %{buildroot}%{_unitdir}/%{name}.service
 %else
-install -d %{buildroot}%{_initrddir}
-install -m 0755 contrib/init/redhat/%{name} %{buildroot}%{_initrddir}/%{name}
+%{__install} -d %{buildroot}%{_initrddir}
+%{__install} -m 0755 contrib/init/redhat/%{name} %{buildroot}%{_initrddir}/%{name}
 %endif
 
-cat > %{buildroot}%{_sysconfdir}/%{name}.conf << 'EOF'
+%{__cat} > %{buildroot}%{_sysconfdir}/%{name}.conf << 'EOF'
 ## BASIC %{bigname} CONFIGURATION FILE
 ## See %{name}.conf(5) or %{_defaultdocdir}/%{name}/%{name}.conf.sample for more
 
@@ -189,7 +187,7 @@ KeyFile	%{_sysconfdir}/%{name}/keys/default.private
 #InternalHosts	refile:%{_sysconfdir}/%{name}/TrustedHosts
 EOF
 
-cat > %{buildroot}%{_sysconfdir}/sysconfig/%{name} << 'EOF'
+%{__cat} > %{buildroot}%{_sysconfdir}/sysconfig/%{name} << 'EOF'
 # Set the necessary startup options
 OPTIONS="-x %{_sysconfdir}/%{name}.conf -P %{_localstatedir}/run/%{name}/%{name}.pid"
 
@@ -200,8 +198,8 @@ DKIM_SELECTOR=default
 DKIM_KEYDIR=%{_sysconfdir}/%{name}/keys
 EOF
 
-mkdir -p %{buildroot}%{_sysconfdir}/%{name}
-cat > %{buildroot}%{_sysconfdir}/%{name}/SigningTable << 'EOF'
+%{__mkdir} -p %{buildroot}%{_sysconfdir}/%{name}
+%{__cat} > %{buildroot}%{_sysconfdir}/%{name}/SigningTable << 'EOF'
 # %{bigname} SIGNING TABLE
 # This table controls how to apply one or more signatures to outgoing messages based
 # on the address found in the From: header field. In simple terms, this tells
@@ -229,7 +227,7 @@ cat > %{buildroot}%{_sysconfdir}/%{name}/SigningTable << 'EOF'
 #example.com default._domainkey.example.com
 EOF
 
-cat > %{buildroot}%{_sysconfdir}/%{name}/KeyTable << 'EOF'
+%{__cat} > %{buildroot}%{_sysconfdir}/%{name}/KeyTable << 'EOF'
 # %{bigname} KEY TABLE
 # To use this file, uncomment the #KeyTable option in %{_sysconfdir}/%{name}.conf,
 # then uncomment the following line and replace example.com with your domain
@@ -238,7 +236,7 @@ cat > %{buildroot}%{_sysconfdir}/%{name}/KeyTable << 'EOF'
 #default._domainkey.example.com example.com:default:%{_sysconfdir}/%{name}/keys/default.private
 EOF
 
-cat > %{buildroot}%{_sysconfdir}/%{name}/TrustedHosts << 'EOF'
+%{__cat} > %{buildroot}%{_sysconfdir}/%{name}/TrustedHosts << 'EOF'
 # %{bigname} TRUSTED HOSTS
 # To use this file, uncomment the #ExternalIgnoreList and/or the #InternalHosts
 # option in %{_sysconfdir}/%{name}.conf then restart %{upname}. Additional hosts
@@ -250,7 +248,7 @@ cat > %{buildroot}%{_sysconfdir}/%{name}/TrustedHosts << 'EOF'
 #192.168.1.0/24
 EOF
 
-cat > README.fedora << 'EOF'
+%{__cat} > README.fedora << 'EOF'
 #####################################
 #FEDORA-SPECIFIC README FOR %{bigname}#
 #####################################
@@ -345,25 +343,25 @@ Official documentation for %{upname} is available at http://%{name}.org/
 ###
 EOF
 
-install -p -d %{buildroot}%{_sysconfdir}/tmpfiles.d
-cat > %{buildroot}%{_sysconfdir}/tmpfiles.d/%{name}.conf <<'EOF'
+%{__install} -p -d %{buildroot}%{_sysconfdir}/tmpfiles.d
+%{__cat} > %{buildroot}%{_sysconfdir}/tmpfiles.d/%{name}.conf <<'EOF'
 D %{_localstatedir}/run/%{name} 0700 %{name} %{name} -
 EOF
 
-rm -r %{buildroot}%{_prefix}/share/doc/%{name}
-rm %{buildroot}%{_libdir}/*.a
-rm %{buildroot}%{_libdir}/*.la
+%{__rm} -r %{buildroot}%{_prefix}/share/doc/%{name}
+%{__rm} %{buildroot}%{_libdir}/*.a
+%{__rm} %{buildroot}%{_libdir}/*.la
 
-mkdir -p %{buildroot}%{_localstatedir}/spool/%{name}
-mkdir -p %{buildroot}%{_localstatedir}/run/%{name}
-mkdir -p %{buildroot}%{_sysconfdir}/%{name}
-mkdir %{buildroot}%{_sysconfdir}/%{name}/keys
+%{__mkdir} -p %{buildroot}%{_localstatedir}/spool/%{name}
+%{__mkdir} -p %{buildroot}%{_localstatedir}/run/%{name}
+%{__mkdir} -p %{buildroot}%{_sysconfdir}/%{name}
+%{__mkdir} %{buildroot}%{_sysconfdir}/%{name}/keys
 
-install -m 0755 stats/%{name}-reportstats %{buildroot}%{_prefix}/sbin/%{name}-reportstats
-sed -i 's|^%{bigname}STATSDIR="/var/db/%{name}"|%{bigname}STATSDIR="%{_localstatedir}/spool/%{name}"|g' %{buildroot}%{_prefix}/sbin/%{name}-reportstats
-sed -i 's|^%{bigname}DATOWNER="mailnull:mailnull"|%{bigname}DATOWNER="%{name}:%{name}"|g' %{buildroot}%{_prefix}/sbin/%{name}-reportstats
+%{__install} -m 0755 stats/%{name}-reportstats %{buildroot}%{_prefix}/sbin/%{name}-reportstats
+%{__sed} -i 's|^%{bigname}STATSDIR="/var/db/%{name}"|%{bigname}STATSDIR="%{_localstatedir}/spool/%{name}"|g' %{buildroot}%{_prefix}/sbin/%{name}-reportstats
+%{__sed} -i 's|^%{bigname}DATOWNER="mailnull:mailnull"|%{bigname}DATOWNER="%{name}:%{name}"|g' %{buildroot}%{_prefix}/sbin/%{name}-reportstats
 
-chmod 0644 contrib/convert/convert_keylist.sh
+%{__chmod} 0644 contrib/convert/convert_keylist.sh
 
 %pre
 getent group %{name} >/dev/null || groupadd -r %{name}
@@ -429,7 +427,7 @@ exit 0
 %postun -n libopendkim -p /sbin/ldconfig
 
 %clean
-rm -rf %{buildroot}
+%{__rm} -rf %{buildroot}
 
 %files
 %if 0%{?_licensedir:1}
@@ -483,6 +481,9 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
+* Mon Apr 13 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-13
+- Replaced various commands with rpm macros
+
 * Mon Apr 06 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-12
 - BuildRequires opendbx-devel instead of opendbx
 - Fixed typo in configure flag
