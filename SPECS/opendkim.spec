@@ -46,21 +46,21 @@ library that implements the DKIM service, plus a milter-based filter
 application that can plug in to any milter-aware MTA, including sendmail,
 Postfix, or any other MTA that supports the milter protocol.
 
-%package -n libopendkim
+%package -n lib%{name}
 Summary: An open source DKIM library
 Group: System Environment/Libraries
-Obsoletes: opendkim-sysvinit < 2.10.1-5
+Obsoletes: %{name}-sysvinit < 2.10.1-5
 
-%description -n libopendkim
+%description -n lib%{name}
 This package contains the library files required for running services built
 using libopendkim.
 
-%package -n libopendkim-devel
+%package -n lib%{name}-devel
 Summary: Development files for lib%{name}
 Group: Development/Libraries
 Requires: lib%{name}%{?_isa} = %{version}-%{release}
 
-%description -n libopendkim-devel
+%description -n lib%{name}-devel
 This package contains the static libraries, headers, and other support files
 required for developing applications against libopendkim.
 
@@ -484,7 +484,7 @@ exit 0
 %changelog
 * Mon Apr 13 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-13
 - Obsoleted sysvinit subpackage via libopendkim subpackage
-- Replaced various commands with rpm macros
+- Added more macros
 - Updated README.fedora
 
 * Mon Apr 06 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-12
