@@ -49,6 +49,7 @@ Postfix, or any other MTA that supports the milter protocol.
 %package -n libopendkim
 Summary: An open source DKIM library
 Group: System Environment/Libraries
+Obsoletes: opendkim-sysvinit < 2.10.1-5
 
 %description -n libopendkim
 This package contains the library files required for running services built
@@ -319,7 +320,7 @@ If you have %upname configured to use SQL datasets on a systemd-based server, it
 %name service after the database servers by referencing your database unit file(s) in the "After" section of the
 %upname unit file.
 
-For example, if using both MariaDB and PostgreSQL, in /usr/lib/systemd/system/opendkim.service change:
+For example, if using both MariaDB and PostgreSQL, in %{_unitdir}/%{name}.service change:
 
 After=network.target nss-lookup.target syslog.target
 
@@ -482,7 +483,9 @@ exit 0
 
 %changelog
 * Mon Apr 13 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-13
+- Obsoleted sysvinit subpackage via libopendkim subpackage
 - Replaced various commands with rpm macros
+- Updated README.fedora
 
 * Mon Apr 06 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-12
 - BuildRequires opendbx-devel instead of opendbx
