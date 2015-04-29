@@ -4,8 +4,8 @@
 
 Summary: A DomainKeys Identified Mail (DKIM) milter to sign and/or verify mail
 Name: opendkim
-Version: 2.10.1
-Release: 13%{?dist}
+Version: 2.10.2
+Release: 1%{?dist}
 Group: System Environment/Daemons
 License: BSD and Sendmail
 URL: http://%{name}.org/
@@ -114,6 +114,14 @@ required for developing applications against libopendkim.
 ## - edit your DNS records to publish your public keys (if signing)
 
 ## See %{_defaultdocdir}/%{name}/INSTALL for detailed instructions.
+
+## DEPRECATED CONFIGURATION OPTIONS
+## The following configuration options are no longer valid. They should be removed from
+## your existing %{name}.conf file to prevent potential issues. Failure to do so may
+## result in %{upname} being unable to start.
+
+## ADSP (as of 2.10.1)
+
 
 ## CONFIGURATION OPTIONS
 
@@ -316,6 +324,8 @@ before attempting to start the %{name} service.
 
 Using %upname with SQL Datasets
 ================================
+%upname on RedHat-based systems relies on OpenDBX for database interaction. Depending on which database you are
+
 If you have %upname configured to use SQL datasets on a systemd-based server, it might be necessary to start the
 %name service after the database servers by referencing your database unit file(s) in the "After" section of the
 %upname unit file.
