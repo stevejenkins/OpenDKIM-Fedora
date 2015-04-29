@@ -116,12 +116,23 @@ required for developing applications against libopendkim.
 ## See %{_defaultdocdir}/%{name}/INSTALL for detailed instructions.
 
 ## DEPRECATED CONFIGURATION OPTIONS
-## The following configuration options are no longer valid. They should be removed from
-## your existing %{name}.conf file to prevent potential issues. Failure to do so may
-## result in %{upname} being unable to start.
-
-## ADSP (as of 2.10.1)
-
+## 
+## The following configuration options are no longer valid.  They should be
+## removed from your existing configuration file to prevent potential issues.
+## Failure to do so may result in %{name} being unable to start.
+## 
+## Removed in 2.10.0:
+##   AddAllSignatureResults
+##   ADSPAction
+##   ADSPNoSuchDomain
+##   BogusPolicy
+##   DisableADSP
+##   LDAPSoftStart
+##   LocalADSP
+##   NoDiscardableMailTo
+##   On-PolicyError
+##   SendADSPReports
+##   UnprotectedPolicy
 
 ## CONFIGURATION OPTIONS
 
@@ -492,6 +503,11 @@ exit 0
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
+* Wed Apr 29 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.2-1
+- Updated to use newer upstream 2.8.1 source code
+- Removed patches for bugs fixed in upstream source
+- Added deprecated options notice to default configuration file
+
 * Mon Apr 13 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-13
 - Obsoleted sysvinit subpackage via libopendkim subpackage
 - Added more macros
