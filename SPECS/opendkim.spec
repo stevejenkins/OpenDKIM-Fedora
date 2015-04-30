@@ -136,75 +136,94 @@ required for developing applications against libopendkim.
 
 ## CONFIGURATION OPTIONS
 
-# Specifies the path to the process ID file.
+##  Specifies the path to the process ID file.
 PidFile	%{_localstatedir}/run/%{name}/%{name}.pid
 
-# Selects operating modes. Valid modes are s (sign) and v (verify). Default is v.
-# Must be changed to s (sign only) or sv (sign and verify) in order to sign outgoing
-# messages.
+##  Selects operating modes. Valid modes are s (sign) and v (verify). Default is v.
+##  Must be changed to s (sign only) or sv (sign and verify) in order to sign outgoing
+##  messages.
 Mode	v
 
-# Log activity to the system log.
+##  Log activity to the system log.
 Syslog	yes
 
-# Log additional entries indicating successful signing or verification of messages.
+##  Log additional entries indicating successful signing or verification of messages.
 SyslogSuccess	yes
 
-# If logging is enabled, include detailed logging about why or why not a message was
-# signed or verified. This causes an increase in the amount of log data generated
-# for each message, so set this to No (or comment it out) if it gets too noisy.
+##  If logging is enabled, include detailed logging about why or why not a message was
+##  signed or verified. This causes an increase in the amount of log data generated
+##  for each message, so set this to No (or comment it out) if it gets too noisy.
 LogWhy	yes
 
-# Attempt to become the specified user before starting operations.
+##  Attempt to become the specified user before starting operations.
 UserID	%{name}:%{name}
 
-# Create a socket through which your MTA can communicate.
+##  Create a socket through which your MTA can communicate.
 Socket	inet:8891@localhost
 
-# Required to use local socket with MTAs that access the socket as a non-
-# privileged user (e.g. Postfix)
+##  Required to use local socket with MTAs that access the socket as a non-
+##  privileged user (e.g. Postfix)
 Umask	002
 
-# This specifies a text file in which to store DKIM transaction statistics.
-# %{upname} must be manually compiled with --enable-stats to enable this feature.
-#Statistics	%{_localstatedir}/spool/%{name}/stats.dat
+##  This specifies a text file in which to store DKIM transaction statistics.
+##  %{upname} must be manually compiled with --enable-stats to enable this feature.
+# Statistics	%{_localstatedir}/spool/%{name}/stats.dat
+
+##  Specifies whether or not the filter should generate report mail back
+##  to senders when verification fails and an address for such a purpose
+##  is provided. See opendkim.conf(5) for details.
+SendReports	yes
+
+##  Specifies the sending address to be used on From: headers of outgoing
+##  failure reports.  By default, the e-mail address of the user executing
+##  the filter is used (executing_user@hostname).
+# ReportAddress	"Example.com Postmaster" <postmaster@example.com>
+
+##  Add a DKIM-Filter header field to messages passing through this filter
+##  to identify messages it has processed.
+SoftwareHeader	yes
 
 ## SIGNING OPTIONS
 
-# Selects the canonicalization method(s) to be used when signing messages.
-Canonicalization	relaxed/relaxed
+##  Selects the canonicalization method(s) to be used when signing messages.
+Canonicalization	relaxed/simple
 
-# Domain(s) whose mail should be signed by this filter. Mail from other domains will
-# be verified rather than being signed. Uncomment and use your domain name.
-# This parameter is not required if a SigningTable is in use.
-#Domain	example.com
+##  Domain(s) whose mail should be signed by this filter. Mail from other domains will
+##  be verified rather than being signed. Uncomment and use your domain name.
+##  This parameter is not required if a SigningTable is in use.
+# Domain	example.com
 
-# Defines the name of the selector to be used when signing messages.
+##  Defines the name of the selector to be used when signing messages.
 Selector	default
 
-# Specifies the minimum number of key bits for acceptable keys and signatures.
-MinimumKeyBits 1024
+##  Specifies the minimum number of key bits for acceptable keys and signatures.
+MinimumKeyBits	1024
 
-# Gives the location of a private key to be used for signing ALL messages. This
-# directive is ignored if KeyTable is enabled.
+##  Gives the location of a private key to be used for signing ALL messages. This
+##  directive is ignored if KeyTable is enabled.
 KeyFile	%{_sysconfdir}/%{name}/keys/default.private
 
-# Gives the location of a file mapping key names to signing keys. In simple terms,
-# this tells %{upname} where to find your keys. If present, overrides any KeyFile
-# directive in the configuration file. Requires SigningTable be enabled.
-#KeyTable	%{_sysconfdir}/%{name}/KeyTable
+##  Gives the location of a file mapping key names to signing keys. In simple terms,
+##  this tells %{upname} where to find your keys. If present, overrides any KeyFile
+##  directive in the configuration file. Requires SigningTable be enabled.
+# KeyTable	%{_sysconfdir}/%{name}/KeyTable
 
-# Defines a table used to select one or more signatures to apply to a message based
-# on the address found in the From: header field. In simple terms, this tells
-# %{upname} how to use your keys. Requires KeyTable be enabled.
-#SigningTable	refile:%{_sysconfdir}/%{name}/SigningTable
+##  Defines a table used to select one or more signatures to apply to a message based
+##  on the address found in the From: header field. In simple terms, this tells
+##  %{upname} how to use your keys. Requires KeyTable be enabled.
+# SigningTable	refile:%{_sysconfdir}/%{name}/SigningTable
 
-# Identifies a set of "external" hosts that may send mail through the server as one
-# of the signing domains without credentials as such.
-#ExternalIgnoreList	refile:%{_sysconfdir}/%{name}/TrustedHosts
+##  Identifies a set of "external" hosts that may send mail through the server as one
+##  of the signing domains without credentials as such.
+# ExternalIgnoreList	refile:%{_sysconfdir}/%{name}/TrustedHosts
 
-# Identifies a set "internal" hosts whose mail should be signed rather than verified.
-#InternalHosts	refile:%{_sysconfdir}/%{name}/TrustedHosts
+##  Identifies a set "internal" hosts whose mail should be signed rather than verified.
+# InternalHosts	refile:%{_sysconfdir}/%{name}/TrustedHosts
+
+##  Contains a list of IP addresses, CIDR blocks, hostnames or domain names
+##  whose mail should be neither signed nor verified by this filter.  See man
+##  page for file format.
+# PeerList	X.X.X.X
 EOF
 
 %{__cat} > %{buildroot}%{_sysconfdir}/sysconfig/%{name} << 'EOF'
@@ -272,7 +291,7 @@ EOF
 #####################################
 #FEDORA-SPECIFIC README FOR %{bigname}#
 #####################################
-Last updated: Mar 3, 2015 by Steve Jenkins (steve@stevejenkins.com)
+Last updated: Apr 30, 2015 by Steve Jenkins (steve@stevejenkins.com)
 
 Generating keys for %{upname}
 ============================
@@ -495,11 +514,12 @@ exit 0
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
-* Wed Apr 29 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.2-1
+* Wed Apr 30 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.2-1
 - Updated to use newer upstream 2.10.2 source code
 - Removed patches for bugs fixed in upstream source
-- Added deprecated options notice to default configuration file
 - Included support for systemd macros
+- Added deprecated options notice to default configuration file
+- Added new options to default configuration file
 - Updated README.fedora with additional SQL useage info
 
 * Mon Apr 13 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-13
