@@ -36,7 +36,7 @@ Requires(postun): initscripts
 BuildRequires: db4-devel
 %endif
 
-Patch0: %{name}.init.patch
+#Patch0: %{name}.init.patch
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -71,7 +71,7 @@ required for developing applications against libopendkim.
 #%patch0 -p1
 %else
 # Apply SysV patches
-%patch0 -p1
+#%patch0 -p1
 %endif
 
 %build
@@ -335,11 +335,20 @@ before attempting to start the %{name} service.
 
 Using %upname with SQL Datasets
 ================================
-%upname on RedHat-based systems relies on OpenDBX for database interaction. Depending on which database you are
+%upname on RedHat-based systems relies on OpenDBX for database access. Depending on which database you use,
+you may have to manually install one of the following OpenDBX subpackages (all of which are available via yum):
 
-If you have %upname configured to use SQL datasets on a systemd-based server, it might be necessary to start the
-%name service after the database servers by referencing your database unit file(s) in the "After" section of the
-%upname unit file.
+- opendbx-firebird
+- opendbx-mssql
+- opendbx-mysql
+- opendbx-postgresql
+- opendbx-sqlite 
+- opendbx-sqlite2
+- opendbx-sybase
+
+If you have %upname configured to use SQL datasets on a systemd-based server, it might also be necessary to start
+the %name service after the database servers by referencing your database unit file(s) in the "After" section of
+the %upname unit file.
 
 For example, if using both MariaDB and PostgreSQL, in %{_unitdir}/%{name}.service change:
 
@@ -394,26 +403,15 @@ exit 0
 
 %post
 %if %systemd
-if [ $1 -eq 1 ] ; then 
-    # Initial installation 
-    /bin/systemctl enable %{name}.service >/dev/null 2>&1 || :
-fi
-
+%systemd_post %{name}.service
 %else
-
 /sbin/chkconfig --add %{name} || :
 %endif
 
 %preun
 %if %systemd
-if [ $1 -eq 0 ] ; then
-    # Package removal, not upgrade
-    /bin/systemctl --no-reload disable %{name}.service > /dev/null 2>&1 || :
-    /bin/systemctl stop %{name}.service > /dev/null 2>&1 || :
-fi
-
+%systemd_preun %{name}.service
 %else
-
 if [ $1 -eq 0 ]; then
 	service %{name} stop >/dev/null || :
 	/sbin/chkconfig --del %{name} || :
@@ -423,14 +421,8 @@ exit 0
 
 %postun
 %if %systemd
-/bin/systemctl daemon-reload >/dev/null 2>&1 || :
-if [ $1 -ge 1 ] ; then
-    # Package upgrade, not uninstall
-    /bin/systemctl try-restart %{name}.service >/dev/null 2>&1 || :
-fi
-
+%systemd_postun_with_restart %{name}.service
 %else
-
 if [ "$1" -ge "1" ] ; then
 	/sbin/service %{name} condrestart >/dev/null 2>&1 || :
 fi
@@ -504,9 +496,11 @@ exit 0
 
 %changelog
 * Wed Apr 29 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.2-1
-- Updated to use newer upstream 2.8.1 source code
+- Updated to use newer upstream 2.10.2 source code
 - Removed patches for bugs fixed in upstream source
 - Added deprecated options notice to default configuration file
+- Included support for systemd macros
+- Updated README.fedora with additional SQL useage info
 
 * Mon Apr 13 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.1-13
 - Obsoleted sysvinit subpackage via libopendkim subpackage
