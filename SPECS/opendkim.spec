@@ -186,7 +186,7 @@ SoftwareHeader	yes
 ## SIGNING OPTIONS
 
 ##  Selects the canonicalization method(s) to be used when signing messages.
-Canonicalization	relaxed/simple
+Canonicalization	relaxed/relaxed
 
 ##  Domain(s) whose mail should be signed by this filter. Mail from other domains will
 ##  be verified rather than being signed. Uncomment and use your domain name.
@@ -456,10 +456,11 @@ exit 0
 %endif
 
 %if %systemd
+# For the switchover from initscript to service file
 %triggerun -- %{name} < 2.8.0-1
-/bin/systemctl enable %{name}.service >/dev/null 2>&1
+%systemd_post %{name}.service
 /sbin/chkconfig --del %{name} >/dev/null 2>&1 || :
-/bin/systemctl try-restart %{name}.service >/dev/null 2>&1 || :
+%systemd_postun_with_restart %{name}.service
 %endif
 
 %post -n libopendkim -p /sbin/ldconfig
