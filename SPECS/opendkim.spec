@@ -224,6 +224,13 @@ KeyFile	%{_sysconfdir}/%{name}/keys/default.private
 ##  whose mail should be neither signed nor verified by this filter.  See man
 ##  page for file format.
 # PeerList	X.X.X.X
+
+##  Always oversign From (sign using actual From and a null From to prevent
+##  malicious signatures header fields (From and/or others) between the signer
+##  and the verifier.  From is oversigned by default in the Fedora package
+##  because it is often the identity key used by reputation systems and thus
+##  somewhat security sensitive.
+OversignHeaders	From
 EOF
 
 %{__cat} > %{buildroot}%{_sysconfdir}/sysconfig/%{name} << 'EOF'
