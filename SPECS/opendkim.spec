@@ -522,7 +522,7 @@ exit 0
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
-* Fri May 01 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.2-1
+* Mon May 11 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.2-1
 - Updated to use newer upstream 2.10.2 source code
 - Removed patches for bugs fixed in upstream source
 - Included support for systemd macros
