@@ -4,7 +4,7 @@
 
 Summary: A DomainKeys Identified Mail (DKIM) milter to sign and/or verify mail
 Name: opendkim
-Version: 2.10.2
+Version: 2.10.3
 Release: 1%{?dist}
 Group: System Environment/Daemons
 License: BSD and Sendmail
@@ -522,6 +522,9 @@ exit 0
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
+* Tue May 12 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.3-1
+- Updated to use newer upstream 2.10.3 source code
+
 * Mon May 11 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.2-1
 - Updated to use newer upstream 2.10.2 source code
 - Removed patches for bugs fixed in upstream source
