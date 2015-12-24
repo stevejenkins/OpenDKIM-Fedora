@@ -4,8 +4,8 @@
 
 Summary: A DomainKeys Identified Mail (DKIM) milter to sign and/or verify mail
 Name: opendkim
-Version: 2.10.2
-Release: 1%{?dist}
+Version: 2.10.3
+Release: 2%{?dist}
 Group: System Environment/Daemons
 License: BSD and Sendmail
 URL: http://%{name}.org/
@@ -522,6 +522,12 @@ exit 0
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
+* Wed Jun 17 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2.10.3-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_23_Mass_Rebuild
+
+* Tue May 12 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.3-1
+- Updated to use newer upstream 2.10.3 source code
+
 * Mon May 11 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.2-1
 - Updated to use newer upstream 2.10.2 source code
 - Removed patches for bugs fixed in upstream source
