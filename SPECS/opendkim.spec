@@ -5,7 +5,7 @@
 Summary: A DomainKeys Identified Mail (DKIM) milter to sign and/or verify mail
 Name: opendkim
 Version: 2.10.3
-Release: 3%{?dist}
+Release: 5%{?dist}
 Group: System Environment/Daemons
 License: BSD and Sendmail
 URL: http://%{name}.org/
@@ -13,7 +13,7 @@ Source0: http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
 
 # Required for all versions
 Requires: lib%{name}%{?_isa} = %{version}-%{release}
-BuildRequires: sendmail-devel, openssl-devel, libtool, pkgconfig, libbsd, libbsd-devel, opendbx-devel
+BuildRequires: sendmail-devel, openssl-devel, libtool, pkgconfig, libbsd, libbsd-devel, opendbx-devel, openldap-devel
 Requires(pre): shadow-utils
 
 %if 0%{?rhel} && 0%{?rhel} == 5
@@ -523,6 +523,12 @@ exit 0
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
+* Wed Jul 20 2016 Steve Jenkins <steve@stevejenkins.com> - 2.10.3-5
+- Fixed OpenLDAP support
+
+* Thu Feb 04 2016 Fedora Release Engineering <releng@fedoraproject.org> - 2.10.3-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_24_Mass_Rebuild
+
 * Fri Dec 25 2015 Steve Jenkins <steve@stevejenkins.com> - 2.10.3-3
 - Added OpenLDAP support for systemd branches in response to RH Bugzilla #1293279
 
