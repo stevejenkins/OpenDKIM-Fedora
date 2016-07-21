@@ -1,4 +1,4 @@
-%global systemd (0%{?fedora} && 0%{?fedora} >= 18) || (0%{?rhel} && 0%{?rhel} >= 7)
+%global systemd (0%{?fedora} >= 18) || (0%{?rhel} >= 7)
 %global upname OpenDKIM
 %global bigname OPENDKIM
 
@@ -11,21 +11,18 @@ License: BSD and Sendmail
 URL: http://%{name}.org/
 Source0: http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
 
+# https://sourceforge.net/p/opendkim/tickets/###/
+#Patch0: %{name}.ticket###.patch
+
 # Required for all versions
 Requires: lib%{name}%{?_isa} = %{version}-%{release}
-BuildRequires: sendmail-devel, openssl-devel, libtool, pkgconfig, libbsd, libbsd-devel, opendbx-devel, openldap-devel
+BuildRequires: sendmail-devel, openssl-devel, libtool, pkgconfig, libbsd, libbsd-devel, opendbx-devel
 Requires(pre): shadow-utils
-
-%if 0%{?rhel} && 0%{?rhel} == 5
-Requires(post): policycoreutils
-%endif
 
 %if %systemd
 # Required for systemd
-Requires(post): systemd-units
-Requires(preun): systemd-units
-Requires(postun): systemd-units
-Requires(post): systemd-sysv
+%{?systemd_requires}
+BuildRequires: systemd
 BuildRequires: libdb-devel, libmemcached-devel
 %else
 # Required for SysV
@@ -35,7 +32,11 @@ Requires(postun): initscripts
 BuildRequires: db4-devel
 %endif
 
-#Patch0: %{name}.init.patch
+%if 0%{?rhel} == 5
+Requires(post): policycoreutils
+%else
+BuildRequires: openldap-devel
+%endif
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -65,6 +66,8 @@ required for developing applications against libopendkim.
 
 %prep
 %setup -q
+# Apply Global patches
+#%patch0 -p1
 %if %systemd
 # Apply systemd patches
 #%patch0 -p1
@@ -87,24 +90,24 @@ required for developing applications against libopendkim.
 %endif
 
 # Remove rpath
-%{__sed} -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
-%{__sed} -i 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' libtool
+sed -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
+sed -i 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' libtool
 
 %install
-%{__make} DESTDIR=%{buildroot} install %{?_smp_mflags}
-%{__install} -d %{buildroot}%{_sysconfdir}
-%{__install} -d %{buildroot}%{_sysconfdir}/sysconfig
-%{__install} -m 0755 contrib/init/redhat/%{name}-default-keygen %{buildroot}%{_sbindir}/%{name}-default-keygen
+make DESTDIR=%{buildroot} install %{?_smp_mflags}
+install -d %{buildroot}%{_sysconfdir}
+install -d %{buildroot}%{_sysconfdir}/sysconfig
+install -m 0755 contrib/init/redhat/%{name}-default-keygen %{buildroot}%{_sbindir}/%{name}-default-keygen
 
 %if %systemd
-%{__install} -d -m 0755 %{buildroot}%{_unitdir}
-%{__install} -m 0644 contrib/systemd/%{name}.service %{buildroot}%{_unitdir}/%{name}.service
+install -d -m 0755 %{buildroot}%{_unitdir}
+install -m 0644 contrib/systemd/%{name}.service %{buildroot}%{_unitdir}/%{name}.service
 %else
-%{__install} -d %{buildroot}%{_initrddir}
-%{__install} -m 0755 contrib/init/redhat/%{name} %{buildroot}%{_initrddir}/%{name}
+install -d %{buildroot}%{_initrddir}
+install -m 0755 contrib/init/redhat/%{name} %{buildroot}%{_initrddir}/%{name}
 %endif
 
-%{__cat} > %{buildroot}%{_sysconfdir}/%{name}.conf << 'EOF'
+cat > %{buildroot}%{_sysconfdir}/%{name}.conf << 'EOF'
 ## BASIC %{bigname} CONFIGURATION FILE
 ## See %{name}.conf(5) or %{_defaultdocdir}/%{name}/%{name}.conf.sample for more
 
@@ -245,8 +248,8 @@ DKIM_SELECTOR=default
 DKIM_KEYDIR=%{_sysconfdir}/%{name}/keys
 EOF
 
-%{__mkdir} -p %{buildroot}%{_sysconfdir}/%{name}
-%{__cat} > %{buildroot}%{_sysconfdir}/%{name}/SigningTable << 'EOF'
+mkdir -p %{buildroot}%{_sysconfdir}/%{name}
+cat > %{buildroot}%{_sysconfdir}/%{name}/SigningTable << 'EOF'
 # %{bigname} SIGNING TABLE
 # This table controls how to apply one or more signatures to outgoing messages based
 # on the address found in the From: header field. In simple terms, this tells
@@ -274,7 +277,7 @@ EOF
 #example.com default._domainkey.example.com
 EOF
 
-%{__cat} > %{buildroot}%{_sysconfdir}/%{name}/KeyTable << 'EOF'
+cat > %{buildroot}%{_sysconfdir}/%{name}/KeyTable << 'EOF'
 # %{bigname} KEY TABLE
 # To use this file, uncomment the #KeyTable option in %{_sysconfdir}/%{name}.conf,
 # then uncomment the following line and replace example.com with your domain
@@ -283,7 +286,7 @@ EOF
 #default._domainkey.example.com example.com:default:%{_sysconfdir}/%{name}/keys/default.private
 EOF
 
-%{__cat} > %{buildroot}%{_sysconfdir}/%{name}/TrustedHosts << 'EOF'
+cat > %{buildroot}%{_sysconfdir}/%{name}/TrustedHosts << 'EOF'
 # %{bigname} TRUSTED HOSTS
 # To use this file, uncomment the #ExternalIgnoreList and/or the #InternalHosts
 # option in %{_sysconfdir}/%{name}.conf then restart %{upname}. Additional hosts
@@ -295,7 +298,7 @@ EOF
 #192.168.1.0/24
 EOF
 
-%{__cat} > README.fedora << 'EOF'
+cat > README.fedora << 'EOF'
 #####################################
 #FEDORA-SPECIFIC README FOR %{bigname}#
 #####################################
@@ -401,25 +404,25 @@ Official documentation for %{upname} is available at http://%{name}.org/
 ###
 EOF
 
-%{__install} -p -d %{buildroot}%{_sysconfdir}/tmpfiles.d
-%{__cat} > %{buildroot}%{_sysconfdir}/tmpfiles.d/%{name}.conf <<'EOF'
+install -p -d %{buildroot}%{_sysconfdir}/tmpfiles.d
+cat > %{buildroot}%{_sysconfdir}/tmpfiles.d/%{name}.conf <<'EOF'
 D %{_localstatedir}/run/%{name} 0700 %{name} %{name} -
 EOF
 
-%{__rm} -r %{buildroot}%{_prefix}/share/doc/%{name}
-%{__rm} %{buildroot}%{_libdir}/*.a
-%{__rm} %{buildroot}%{_libdir}/*.la
+rm -r %{buildroot}%{_prefix}/share/doc/%{name}
+rm %{buildroot}%{_libdir}/*.a
+rm %{buildroot}%{_libdir}/*.la
 
-%{__mkdir} -p %{buildroot}%{_localstatedir}/spool/%{name}
-%{__mkdir} -p %{buildroot}%{_localstatedir}/run/%{name}
-%{__mkdir} -p %{buildroot}%{_sysconfdir}/%{name}
-%{__mkdir} %{buildroot}%{_sysconfdir}/%{name}/keys
+mkdir -p %{buildroot}%{_localstatedir}/spool/%{name}
+mkdir -p %{buildroot}%{_localstatedir}/run/%{name}
+mkdir -p %{buildroot}%{_sysconfdir}/%{name}
+mkdir %{buildroot}%{_sysconfdir}/%{name}/keys
 
-%{__install} -m 0755 stats/%{name}-reportstats %{buildroot}%{_prefix}/sbin/%{name}-reportstats
-%{__sed} -i 's|^%{bigname}STATSDIR="/var/db/%{name}"|%{bigname}STATSDIR="%{_localstatedir}/spool/%{name}"|g' %{buildroot}%{_prefix}/sbin/%{name}-reportstats
-%{__sed} -i 's|^%{bigname}DATOWNER="mailnull:mailnull"|%{bigname}DATOWNER="%{name}:%{name}"|g' %{buildroot}%{_prefix}/sbin/%{name}-reportstats
+install -m 0755 stats/%{name}-reportstats %{buildroot}%{_prefix}/sbin/%{name}-reportstats
+sed -i 's|^%{bigname}STATSDIR="/var/db/%{name}"|%{bigname}STATSDIR="%{_localstatedir}/spool/%{name}"|g' %{buildroot}%{_prefix}/sbin/%{name}-reportstats
+sed -i 's|^%{bigname}DATOWNER="mailnull:mailnull"|%{bigname}DATOWNER="%{name}:%{name}"|g' %{buildroot}%{_prefix}/sbin/%{name}-reportstats
 
-%{__chmod} 0644 contrib/convert/convert_keylist.sh
+chmod 0644 contrib/convert/convert_keylist.sh
 
 %pre
 getent group %{name} >/dev/null || groupadd -r %{name}
@@ -469,14 +472,10 @@ exit 0
 %postun -n libopendkim -p /sbin/ldconfig
 
 %clean
-%{__rm} -rf %{buildroot}
+rm -rf %{buildroot}
 
 %files
-%if 0%{?_licensedir:1}
 %license LICENSE LICENSE.Sendmail
-%else
-%doc LICENSE LICENSE.Sendmail
-%endif
 %doc FEATURES KNOWNBUGS RELEASE_NOTES RELEASE_NOTES.Sendmail INSTALL
 %doc contrib/convert/convert_keylist.sh %{name}/*.sample
 %doc %{name}/%{name}.conf.simple-verify %{name}/%{name}.conf.simple
@@ -524,7 +523,8 @@ exit 0
 
 %changelog
 * Wed Jul 20 2016 Steve Jenkins <steve@stevejenkins.com> - 2.10.3-5
-- Fixed OpenLDAP support
+- Fixed OpenLDAP support for all targets except EL5 (required version not available)
+- Updated spec file to more modern conventions
 
 * Thu Feb 04 2016 Fedora Release Engineering <releng@fedoraproject.org> - 2.10.3-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_24_Mass_Rebuild
