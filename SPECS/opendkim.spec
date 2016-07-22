@@ -5,14 +5,14 @@
 Summary: A DomainKeys Identified Mail (DKIM) milter to sign and/or verify mail
 Name: opendkim
 Version: 2.10.3
-Release: 5%{?dist}
+Release: 6%{?dist}
 Group: System Environment/Daemons
 License: BSD and Sendmail
 URL: http://%{name}.org/
 Source0: http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
 
 # https://sourceforge.net/p/opendkim/tickets/###/
-#Patch0: %{name}.ticket###.patch
+Patch0: %{name}.ticket226.patch
 
 # Required for all versions
 Requires: lib%{name}%{?_isa} = %{version}-%{release}
@@ -67,7 +67,7 @@ required for developing applications against libopendkim.
 %prep
 %setup -q
 # Apply Global patches
-#%patch0 -p1
+%patch0 -p1
 %if %systemd
 # Apply systemd patches
 #%patch0 -p1
@@ -522,6 +522,9 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
+* Fri Jul 22 2016 Steve Jenkins <steve@stevejenkins.com> - 2.10.3-6
+- Patched for From: field wrapping issue (SF Ticket #226)
+
 * Wed Jul 20 2016 Steve Jenkins <steve@stevejenkins.com> - 2.10.3-5
 - Fixed OpenLDAP support for all targets except EL5 (required version not available)
 - Updated spec file to more modern conventions
