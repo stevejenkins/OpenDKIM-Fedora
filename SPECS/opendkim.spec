@@ -5,7 +5,7 @@
 Summary: A DomainKeys Identified Mail (DKIM) milter to sign and/or verify mail
 Name: opendkim
 Version: 2.10.3
-Release: 6%{?dist}
+Release: 7%{?dist}
 Group: System Environment/Daemons
 License: BSD and Sendmail
 URL: http://%{name}.org/
@@ -83,10 +83,10 @@ required for developing applications against libopendkim.
 
 %if %systemd
 # Configure with options available to systemd
-%configure --with-odbx --with-db --with-libmemcached --with-openldap
+%configure --with-odbx --with-db --with-libmemcached --with-openldap --enable-query_cache
 %else
 # Configure with options available to SysV
-%configure --with-odbx --with-db --with-openldap
+%configure --with-odbx --with-db --with-openldap --enable-query_cache
 %endif
 
 # Remove rpath
@@ -235,6 +235,12 @@ KeyFile	%{_sysconfdir}/%{name}/keys/default.private
 ##  because it is often the identity key used by reputation systems and thus
 ##  somewhat security sensitive.
 OversignHeaders	From
+
+##  Instructs the DKIM library to maintain its own local cache of keys and
+##  policies retrieved from DNS, rather than relying on the nameserver for
+##  caching service. Useful if the nameserver being used by the filter is
+##  not local.
+# QueryCache	yes
 EOF
 
 %{__cat} > %{buildroot}%{_sysconfdir}/sysconfig/%{name} << 'EOF'
@@ -522,6 +528,9 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
+* Mon Aug 01 2016 Steve Jenkins <steve@stevejenkins.com> - 2.10.3-7
+- Added compile-time support for QUERY_CACHE (RH Bugzilla #1361038)
+
 * Fri Jul 22 2016 Steve Jenkins <steve@stevejenkins.com> - 2.10.3-6
 - Patched for From: field wrapping issue (SF Ticket #226)
 
