@@ -11,7 +11,7 @@ License: BSD and Sendmail
 URL: http://%{name}.org/
 Source0: http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
 
-# https://sourceforge.net/p/opendkim/tickets/###/
+# https://sourceforge.net/p/opendkim/bugs/226/
 Patch0: %{name}.ticket226.patch
 
 # Required for all versions
