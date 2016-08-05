@@ -5,7 +5,7 @@
 Summary: A DomainKeys Identified Mail (DKIM) milter to sign and/or verify mail
 Name: opendkim
 Version: 2.10.3
-Release: 7%{?dist}
+Release: 8%{?dist}
 Group: System Environment/Daemons
 License: BSD and Sendmail
 URL: http://%{name}.org/
@@ -16,7 +16,7 @@ Patch0: %{name}.ticket226.patch
 
 # Required for all versions
 Requires: lib%{name}%{?_isa} = %{version}-%{release}
-BuildRequires: sendmail-devel, openssl-devel, libtool, pkgconfig, libbsd, libbsd-devel, opendbx-devel
+BuildRequires: openssl-devel, libtool, pkgconfig, libbsd, libbsd-devel, opendbx-devel
 Requires(pre): shadow-utils
 
 %if %systemd
@@ -30,6 +30,13 @@ Requires(post): chkconfig
 Requires(preun): chkconfig, initscripts
 Requires(postun): initscripts
 BuildRequires: db4-devel
+%endif
+
+# sendmail-devel renamed for F25+
+%if 0%{?fedora} >= 25
+BuildRequires: sendmail-milter-devel
+%else
+BuildRequires: sendmail-devel
 %endif
 
 %if 0%{?rhel} == 5
@@ -528,6 +535,9 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
+* Mon Aug 01 2016 Steve Jenkins <steve@stevejenkins.com> - 2.10.3-8
+- Updated BuildRequires to sendmail-milter-devel for F25+ (RH Bugzilla #891288)
+
 * Mon Aug 01 2016 Steve Jenkins <steve@stevejenkins.com> - 2.10.3-7
 - Added compile-time support for QUERY_CACHE (RH Bugzilla #1361038)
 
