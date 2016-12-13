@@ -5,7 +5,7 @@
 Summary: A DomainKeys Identified Mail (DKIM) milter to sign and/or verify mail
 Name: opendkim
 Version: 2.10.3
-Release: 10%{?dist}
+Release: 9%{?dist}
 Group: System Environment/Daemons
 License: BSD and Sendmail
 URL: http://%{name}.org/
@@ -127,11 +127,11 @@ cat > %{buildroot}%{_sysconfdir}/%{name}.conf << 'EOF'
 ## See %{_defaultdocdir}/%{name}/INSTALL for detailed instructions.
 
 ## DEPRECATED CONFIGURATION OPTIONS
-##
+## 
 ## The following configuration options are no longer valid.  They should be
 ## removed from your existing configuration file to prevent potential issues.
 ## Failure to do so may result in %{name} being unable to start.
-##
+## 
 ## Removed in 2.10.0:
 ##   AddAllSignatureResults
 ##   ADSPAction
@@ -385,7 +385,7 @@ you may have to manually install one of the following OpenDBX subpackages (all o
 - opendbx-mssql
 - opendbx-mysql
 - opendbx-postgresql
-- opendbx-sqlite
+- opendbx-sqlite 
 - opendbx-sqlite2
 - opendbx-sybase
 
@@ -535,10 +535,7 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
-* ?? Aug 01 2016 Steve Jenkins <steve@stevejenkins.com> - 2.10.3-10
-- Minor cleanup of spec file
-
-* Thu Aug 05  2016 Steve Jenkins <steve@stevejenkins.com> - 2.10.3-9
+* Mon Aug 01 2016 Steve Jenkins <steve@stevejenkins.com> - 2.10.3-9
 - Changed sendmail-milter-devel BuildRequires to > F25
 
 * Mon Aug 01 2016 Steve Jenkins <steve@stevejenkins.com> - 2.10.3-8
