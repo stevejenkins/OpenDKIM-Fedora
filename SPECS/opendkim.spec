@@ -5,7 +5,7 @@
 Summary: A DomainKeys Identified Mail (DKIM) milter to sign and/or verify mail
 Name: opendkim
 Version: 2.10.3
-Release: 10%{?dist}
+Release: 9%{?dist}
 Group: System Environment/Daemons
 License: BSD and Sendmail
 URL: http://%{name}.org/
@@ -13,9 +13,6 @@ Source0: http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
 
 # https://sourceforge.net/p/opendkim/bugs/226/
 Patch0: %{name}.ticket226.patch
-
-# Required for all versions when patching the build scripts
-BuildRequires: autoconf, automake
 
 # Required for all versions
 Requires: lib%{name}%{?_isa} = %{version}-%{release}
@@ -48,6 +45,8 @@ Requires(post): policycoreutils
 BuildRequires: openldap-devel
 %endif
 
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+
 %description
 %{upname} allows signing and/or verification of email through an open source
 library that implements the DKIM service, plus a milter-based filter
@@ -73,15 +72,21 @@ This package contains the static libraries, headers, and other support files
 required for developing applications against libopendkim.
 
 %prep
-%autosetup -p1
+%setup -q
+# Apply Global patches
+%patch0 -p1
+%if %systemd
+# Apply systemd patches
+#%patch0 -p1
+%else
+# Apply SysV patches
+#%patch0 -p1
+%endif
 
 %build
 # Always use system libtool instead of pacakge-provided one to
 # properly handle 32 versus 64 bit detection and settings
 %define LIBTOOL LIBTOOL=`which libtool`
-
-# Needed since we're patching the build process
-autoreconf -i
 
 %if %systemd
 # Configure with options available to systemd
@@ -122,11 +127,11 @@ cat > %{buildroot}%{_sysconfdir}/%{name}.conf << 'EOF'
 ## See %{_defaultdocdir}/%{name}/INSTALL for detailed instructions.
 
 ## DEPRECATED CONFIGURATION OPTIONS
-##
+## 
 ## The following configuration options are no longer valid.  They should be
 ## removed from your existing configuration file to prevent potential issues.
 ## Failure to do so may result in %{name} being unable to start.
-##
+## 
 ## Removed in 2.10.0:
 ##   AddAllSignatureResults
 ##   ADSPAction
@@ -380,7 +385,7 @@ you may have to manually install one of the following OpenDBX subpackages (all o
 - opendbx-mssql
 - opendbx-mysql
 - opendbx-postgresql
-- opendbx-sqlite
+- opendbx-sqlite 
 - opendbx-sqlite2
 - opendbx-sybase
 
@@ -530,9 +535,6 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
-* Tue Dec 13 2016 Steve Jenkins <steve@stevejenkins.com> - 2.10.3-10
-- Modernize spec slightly (thanks to EPEL 5 getting a bit more modern)
-
 * Mon Aug 01 2016 Steve Jenkins <steve@stevejenkins.com> - 2.10.3-9
 - Changed sendmail-milter-devel BuildRequires to > F25
 
