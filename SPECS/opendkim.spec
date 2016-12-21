@@ -4,15 +4,17 @@
 
 Summary: A DomainKeys Identified Mail (DKIM) milter to sign and/or verify mail
 Name: opendkim
-Version: 2.10.3
-Release: 9%{?dist}
+Version: 2.11.0
+Release: 0.1%{?dist}
 Group: System Environment/Daemons
 License: BSD and Sendmail
 URL: http://%{name}.org/
 Source0: http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
 
-# https://sourceforge.net/p/opendkim/bugs/226/
-Patch0: %{name}.ticket226.patch
+# https://sourceforge.net/p/opendkim/patches/35/
+# https://sourceforge.net/p/opendkim/patches/37/
+# Patches rediffed and combined (both modify configure)
+Patch0: %{name}.ticket35+37.patch
 
 # Required for all versions
 Requires: lib%{name}%{?_isa} = %{version}-%{release}
@@ -72,16 +74,7 @@ This package contains the static libraries, headers, and other support files
 required for developing applications against libopendkim.
 
 %prep
-%setup -q
-# Apply Global patches
-%patch0 -p1
-%if %systemd
-# Apply systemd patches
-#%patch0 -p1
-%else
-# Apply SysV patches
-#%patch0 -p1
-%endif
+%autosetup -p1
 
 %build
 # Always use system libtool instead of pacakge-provided one to
@@ -535,6 +528,11 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/*.pc
 
 %changelog
+* Tue Dec 20 2016 Steve Jenkins <steve@stevejenkins.com> - 2.11.0-0.1
+- Updated to 2.11.0.Alpha0 upstream source
+- Rediffed, combined, and applied patch for SF #35 + #37
+- Modernized spec slightly (thanks to EPEL 5 getting a bit more modern)
+
 * Mon Aug 01 2016 Steve Jenkins <steve@stevejenkins.com> - 2.10.3-9
 - Changed sendmail-milter-devel BuildRequires to > F25
 
