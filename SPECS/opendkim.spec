@@ -9,7 +9,7 @@ Release: 0.1%{?dist}
 Group: System Environment/Daemons
 License: BSD and Sendmail
 URL: http://%{name}.org/
-Source0: http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
+Source0: http://downloads.sourceforge.net/%{name}/%{name}-%{version}.Alpha0.tar.gz
 
 # https://sourceforge.net/p/opendkim/patches/35/
 # https://sourceforge.net/p/opendkim/patches/37/
